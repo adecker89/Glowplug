@@ -1,0 +1,31 @@
+package ${packageName};
+
+public class ${className}Entity {
+
+public static final String TABLE_NAME = "${tableName}";
+
+public static class ColumnStrings {
+#foreach($field in $fields)
+    public static final String ${field.name.toUpperCase()} = "$field.modelName";
+#end
+}
+
+public static enum Columns {
+#foreach($field in $fields)
+    ${field.name.toUpperCase()}("$field.modelName"),
+#end
+    ;
+
+    private String modelName;
+    private Columns(String modelName) {
+        this.modelName = modelName;
+    }
+
+    public String getFQName() {
+        return TABLE_NAME + "." + modelName;
+    }
+    public String toString() {
+        return modelName;
+    }
+}
+}

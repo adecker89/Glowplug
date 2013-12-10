@@ -1,0 +1,73 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.6.1'
+    }
+}
+apply plugin: 'android'
+
+configurations {
+    apt
+}
+
+repositories {
+    mavenCentral()
+//    maven {
+//        url "https://oss.sonatype.org/content/repositories/snapshots/"
+//    }
+
+}
+
+//ext.androidAnnotationsVersion = '3.0-SNAPSHOT';
+
+android {
+    compileSdkVersion 18
+    buildToolsVersion "18.0.1"
+
+    defaultConfig {
+        minSdkVersion 7
+        targetSdkVersion 16
+    }
+}
+
+dependencies {
+	compile 'com.android.support:appcompat-v7:18.0.0'
+    //apt "org.androidannotations:androidannotations:$ext.androidAnnotationsVersion"
+    //compile "org.androidannotations:androidannotations-api:$ext.androidAnnotationsVersion"
+    apt project(':GlowPlug-compiler')
+    compile project(':GlowPlug-compiler')
+}
+
+
+android.applicationVariants.all { variant ->
+    ext.aptOutput = file("${project.buildDir}/source/apt_generated")
+    ext.aptOutput.mkdirs()
+    variant.javaCompile.options.compilerArgs += [
+            '-processorpath', configurations.apt.asPath,
+            '-AandroidManifestFile=' + variant.processResources.manifestFile,
+            '-s', ext.aptOutput
+    ]
+}
+
+task addTest() {
+
+    def src = ["${project.buildDir}/source/apt_generated"]
+    def  file = file("GlowPlug-example.iml")
+
+    doLast{
+        def parsedXml = (new XmlParser()).parse(file)
+        def node = parsedXml.component[1].content[0]
+        src.each{
+            def path = 'file://$MODULE_DIR$/'+"${it}"
+            def set =  node.find { it.@url == path}
+            if( set == null) {
+                new Node(node, 'sourceFolder', [ 'url' :'file://$MODULE_DIR$/'+"${it}", 'isTestSource':"true"])
+                def writer = new StringWriter()
+                new XmlNodePrinter(new PrintWriter(writer)).print(parsedXml)
+                file.text = writer.toString()
+            }
+        }
+    }
+}
