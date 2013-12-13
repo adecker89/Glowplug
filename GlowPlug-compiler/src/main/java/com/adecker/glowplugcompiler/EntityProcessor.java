@@ -149,7 +149,7 @@ public class EntityProcessor extends AbstractProcessor {
 		List<GlowplugAttribute> fields = new ArrayList<GlowplugAttribute>();
 		for (Element enclosed : classElement.getEnclosedElements()) {
 			if (enclosed.getKind() == ElementKind.FIELD) {
-				fields.add(new AttributeParser((VariableElement) enclosed));
+				fields.add(new AttributeParser((VariableElement) enclosed).parse());
 				processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "adding field: " + enclosed
 						.getSimpleName());
 			}

@@ -15,20 +15,25 @@ public class ${className}Entity extends GlowplugEntity{
 
     public static enum Attribute {
     #foreach($field in $fields)
-        ${field.name.toUpperCase()}("$field.localName"),
+        ${field.name.toUpperCase()}(new GlowplugAttribute(TABLE_NAME,"$field.localName","")),
     #end
         ;
 
-        private String name;
-        private Attribute(String name) {
-            this.name = name;
+        private GlowplugAttribute attr;
+        private Attribute(GlowplugAttribute attr) {
+            this.attr = attr;
+        }
+
+        public GlowplugAttribute getAttribute() {
+            return attr;
         }
 
         public String getFQName() {
-            return TABLE_NAME + "." + name;
+            return attr.getFQName();
         }
+
         public String toString() {
-            return name;
+            return attr.getName();
         }
     }
 
