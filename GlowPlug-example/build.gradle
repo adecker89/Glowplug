@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.1'
+        classpath 'com.android.tools.build:gradle:0.6.3'
     }
 }
 apply plugin: 'android'
@@ -38,6 +38,8 @@ dependencies {
     //compile "org.androidannotations:androidannotations-api:$ext.androidAnnotationsVersion"
     apt project(':GlowPlug-compiler')
     compile project(':GlowPlug-compiler')
+
+    //compile project(':GlowPlug')
 }
 
 

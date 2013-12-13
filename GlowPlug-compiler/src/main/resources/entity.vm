@@ -1,31 +1,63 @@
 package ${packageName};
 
-public class ${className}Entity {
+import com.adecker.glowplugcompiler.GlowplugAttribute;
+import com.adecker.glowplugcompiler.GlowplugEntity;
+import com.adecker.glowplugcompiler.GlowplugRelationship;
 
-public static final String TABLE_NAME = "${tableName}";
+public class ${className}Entity extends GlowplugEntity{
+    public static final String TABLE_NAME = "${tableName}";
 
-public static class ColumnStrings {
-#foreach($field in $fields)
-    public static final String ${field.name.toUpperCase()} = "$field.modelName";
-#end
-}
-
-public static enum Columns {
-#foreach($field in $fields)
-    ${field.name.toUpperCase()}("$field.modelName"),
-#end
-    ;
-
-    private String modelName;
-    private Columns(String modelName) {
-        this.modelName = modelName;
+    public static class AttributeNames {
+    #foreach($field in $fields)
+        public static final String ${field.name.toUpperCase()} = "$field.localName";
+    #end
     }
 
-    public String getFQName() {
-        return TABLE_NAME + "." + modelName;
+    public static enum Attribute {
+    #foreach($field in $fields)
+        ${field.name.toUpperCase()}("$field.localName"),
+    #end
+        ;
+
+        private String name;
+        private Attribute(String name) {
+            this.name = name;
+        }
+
+        public String getFQName() {
+            return TABLE_NAME + "." + name;
+        }
+        public String toString() {
+            return name;
+        }
     }
-    public String toString() {
-        return modelName;
+
+    public ${className}Entity() {
     }
-}
+
+    @Override
+    public String getName() {
+        return TABLE_NAME;
+    }
+
+    @Override
+    public String getLocalName() {
+        return TABLE_NAME;
+    }
+
+    @Override
+    public String getRemoteName() {
+        return TABLE_NAME;
+    }
+
+    @Override
+    public GlowplugAttribute[] getAttributes() {
+        return null;
+    }
+
+    @Override
+    public GlowplugRelationship[] getRelationships() {
+        return null;
+    }
+
 }

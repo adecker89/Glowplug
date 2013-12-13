@@ -28,4 +28,8 @@ android {
 }
 
 dependencies {
+
+    dependencies {
+        compile project(':GlowPlug-compiler')
+    }
 }
