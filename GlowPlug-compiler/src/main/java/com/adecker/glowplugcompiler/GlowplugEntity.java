@@ -23,6 +23,13 @@ public abstract class GlowplugEntity {
             sb.append(",");
         }
 
+	    for(GlowplugRelationship rel : getRelationships()) {
+		    if(!rel.isManyToMany()) {
+			    sb.append(rel.getCreateSql());
+			    sb.append(",");
+		    }
+	    }
+
         sb.setLength(sb.length() - 1); //remove trailing comma
         sb.append(");");
 

@@ -10,7 +10,6 @@ import com.adecker.glowplugcompiler.GlowplugEntity;
 import com.adecker.glowplugcompiler.GlowplugRelationship;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -20,7 +19,7 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "GlowplugOpenHelper";
     private GlowplugEntity[] entities;
-    private Set<GlowplugRelationship> relationships = new HashSet<GlowplugRelationship>();
+    private Set<GlowplugRelationship> relationshipTables = new HashSet<GlowplugRelationship>();
 
     public GlowplugOpenHelper(Context context, String name, int version, GlowplugEntity[] entities) {
         super(context, name, null, version);
@@ -39,7 +38,9 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
 
         for (GlowplugEntity entity : entities) {
             for (GlowplugRelationship relationship : entity.getRelationships()) {
-                relationships.add(relationship);
+	            if(relationship.isManyToMany()) {
+                    relationshipTables.add(relationship);
+	            }
             }
 
             String command = entity.getCreateSql();
@@ -49,7 +50,7 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
             }
         }
 
-        for(GlowplugRelationship relationship : relationships) {
+        for(GlowplugRelationship relationship : relationshipTables) {
             String command = relationship.getCreateSql();
             if (!TextUtils.isEmpty(command)) {
                 db.execSQL(command);
@@ -59,6 +60,22 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+	    String dropSql = "DROP TABLE IF EXISTS ";
+	    for (GlowplugEntity entity : entities) {
+		    for (GlowplugRelationship relationship : entity.getRelationships()) {
+			    if(relationship.isManyToMany()) {
+				    String command = dropSql + relationship.getManyToManyTableName();
+				    db.execSQL(command);
+				    Log.v(TAG, "dropping table with command: " + command);
+			    }
+		    }
+		    String command = dropSql + entity.getLocalName();
+		    db.execSQL(command);
+		    Log.v(TAG, "dropping table with command: " + command);
+	    }
+
+	    onCreate(db);
     }
 
 }

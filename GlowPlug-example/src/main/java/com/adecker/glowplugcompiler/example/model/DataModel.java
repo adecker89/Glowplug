@@ -2,6 +2,7 @@ package com.adecker.glowplugcompiler.example.model;
 
 import com.adecker.glowplugcompiler.Attribute;
 import com.adecker.glowplugcompiler.Entity;
+import com.adecker.glowplugcompiler.Relationship;
 
 
 /**
@@ -19,7 +20,7 @@ public class DataModel {
 
 	@Entity
 	public static class Film {
-		@Attribute(name="film_id")
+		@Attribute(localName="film_id")
 		public long id;
 		public String title;
 		public String description;
@@ -39,7 +40,7 @@ public class DataModel {
 		public long id;
 		public String city;
 
-		@Attribute(foreignKeyTable=CountryEntity.TABLE_NAME, foreignKeyColumn=CountryEntity.AttributeNames.ID)
+		@Relationship(table=Country.class, key="id")
 		public long countryId;
 		public long lastUpdate;
 	}

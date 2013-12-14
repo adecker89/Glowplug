@@ -8,14 +8,14 @@ public class ${className}Entity extends GlowplugEntity{
     public static final String TABLE_NAME = "${tableName}";
 
     public static class AttributeNames {
-    #foreach($field in $fields)
-        public static final String ${field.name.toUpperCase()} = "$field.localName";
+    #foreach($attr in $attrs)
+        public static final String ${attr.name.toUpperCase()} = "$attr.localName";
     #end
     }
 
     public static enum Attribute {
-    #foreach($field in $fields)
-        ${field.name.toUpperCase()}(new GlowplugAttribute(TABLE_NAME,"$field.localName","")),
+    #foreach($attr in $attrs)
+        ${attr.name.toUpperCase()}(new GlowplugAttribute(TABLE_NAME,"$attr.localName","INTEGER")),
     #end
         ;
 
@@ -34,6 +34,36 @@ public class ${className}Entity extends GlowplugEntity{
 
         public String toString() {
             return attr.getName();
+        }
+    }
+
+    public static class RelationshipNames {
+    #foreach($relationship in $relationships)
+        public static final String ${relationship.name.toUpperCase()} = "$relationship.localName";
+    #end
+    }
+
+    public static enum Relationship {
+    #foreach($relationship in $relationships)
+        ${relationship.localName.toUpperCase()}(new GlowplugRelationship(TABLE_NAME,"$relationship.localName","$relationship.foreignTable", "$relationship.foreignKey")),
+    #end
+        ;
+
+        private GlowplugRelationship relationship;
+        private Relationship(GlowplugRelationship relationship) {
+            this.relationship = relationship;
+        }
+
+        public GlowplugRelationship getRelationship() {
+            return relationship;
+        }
+
+        public String getFQName() {
+            return relationship.getFQName();
+        }
+
+        public String toString() {
+            return relationship.getName();
         }
     }
 
@@ -73,7 +103,15 @@ public class ${className}Entity extends GlowplugEntity{
 
     @Override
     public GlowplugRelationship[] getRelationships() {
-        return new GlowplugRelationship[0];
+        Relationship[] values = Relationship.values();
+        if(relationships == null) {
+            relationships = new GlowplugRelationship[values.length];
+            for(int i=0;i<values.length;i++) {
+                relationships[i] = values[i].getRelationship();
+            }
+        }
+
+        return relationships;
     }
 
 }

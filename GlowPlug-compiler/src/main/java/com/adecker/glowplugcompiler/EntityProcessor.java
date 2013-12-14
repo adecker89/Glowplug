@@ -27,7 +27,7 @@ public class EntityProcessor extends AbstractProcessor {
 
 	private VelocityEngine ve;
 
-	public EntityProcessor() {
+    public EntityProcessor() {
 		super();
 	}
 
@@ -85,14 +85,19 @@ public class EntityProcessor extends AbstractProcessor {
 		packageName = packageElement.getQualifiedName().toString();
 		tableName = className;
 
-		List<GlowplugAttribute> fields = getColumns(classElement);
+
 
 		VelocityContext vc = new VelocityContext();
 
 		vc.put("className", className);
 		vc.put("packageName", packageName);
-		vc.put("fields", fields.toArray(new GlowplugAttribute[fields.size()]));
 		vc.put("tableName", tableName);
+
+        ArrayList<GlowplugAttribute> attrs = new ArrayList<GlowplugAttribute>();
+        ArrayList<GlowplugRelationship> relationships = new ArrayList<GlowplugRelationship>();
+        parseFields(classElement, attrs, relationships);
+        vc.put("attrs", attrs.toArray(new GlowplugAttribute[attrs.size()]));
+        vc.put("relationships", relationships.toArray(new GlowplugRelationship[relationships.size()]));
 
 		Template vt = ve.getTemplate("entity.vm");
 
@@ -100,6 +105,21 @@ public class EntityProcessor extends AbstractProcessor {
 
 		writeTemplateToFile(vt, vc, name, e);
 	}
+
+    private void parseFields(TypeElement classElement, List<GlowplugAttribute> attrs, List<GlowplugRelationship> relationships) {
+        for (Element enclosed : classElement.getEnclosedElements()) {
+            if (enclosed.getKind() == ElementKind.FIELD) {
+                VariableParser parser = new VariableParser(processingEnv,(VariableElement) enclosed);
+                if(parser.isRelationship()) {
+                    relationships.add(parser.parseRelationship());
+                } else {
+                    attrs.add(parser.parseAttribute());
+                }
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "adding field: " + enclosed
+                        .getSimpleName());
+            }
+        }
+    }
 
 	private void generateEntityList(ArrayList<Element> entities) {
 		if(entities == null || entities.isEmpty()) {
@@ -143,17 +163,5 @@ public class EntityProcessor extends AbstractProcessor {
 			type = type.getEnclosingElement();
 		}
 		return (PackageElement) type;
-	}
-
-	private List<GlowplugAttribute> getColumns(TypeElement classElement) {
-		List<GlowplugAttribute> fields = new ArrayList<GlowplugAttribute>();
-		for (Element enclosed : classElement.getEnclosedElements()) {
-			if (enclosed.getKind() == ElementKind.FIELD) {
-				fields.add(new AttributeParser((VariableElement) enclosed).parse());
-				processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "adding field: " + enclosed
-						.getSimpleName());
-			}
-		}
-		return fields;
 	}
 }
