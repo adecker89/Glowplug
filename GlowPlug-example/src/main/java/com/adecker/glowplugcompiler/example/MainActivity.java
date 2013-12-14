@@ -1,20 +1,33 @@
 package com.adecker.glowplugcompiler.example;
 
 import android.app.Activity;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.view.Menu;
 import android.widget.ListView;
+
+import com.adecker.glowplug.GlowplugOpenHelper;
+import com.adecker.glowplugcompiler.example.model.ActorEntity;
+import com.adecker.glowplugcompiler.example.model.EntityList;
 import com.adecker.glowplugcompiler.example.model.FilmEntity;
-import com.adecker.smartcursortest.R;
+import com.adecker.glowplugcompiler.example.R;
 
 public class MainActivity extends Activity {
 	ListView bookmarkList;
+
+    private GlowplugOpenHelper dbHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 	    FilmEntity film;
+
+        dbHelper = new GlowplugOpenHelper(this,"Actors",1, EntityList.entities);
+        Cursor cursor = dbHelper.getReadableDatabase().query(ActorEntity.TABLE_NAME,null,null,null,null,null,null);
     }
 
     @Override

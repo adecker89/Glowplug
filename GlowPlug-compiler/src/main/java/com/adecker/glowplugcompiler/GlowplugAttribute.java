@@ -26,7 +26,7 @@ public class GlowplugAttribute {
     }
 
     public String getSqliteType() {return type;};
-    public String[] getConstraints() {return null;};
+    public String[] getConstraints() {return new String[0];};
 
 
     public String getCreateSql() {

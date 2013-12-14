@@ -27,8 +27,8 @@ android {
     buildToolsVersion "18.0.1"
 
     defaultConfig {
-        minSdkVersion 7
-        targetSdkVersion 16
+        minSdkVersion 14
+        targetSdkVersion 19
     }
 }
 
@@ -39,7 +39,7 @@ dependencies {
     apt project(':GlowPlug-compiler')
     compile project(':GlowPlug-compiler')
 
-    //compile project(':GlowPlug')
+    compile project(':GlowPlug')
 }
 
 

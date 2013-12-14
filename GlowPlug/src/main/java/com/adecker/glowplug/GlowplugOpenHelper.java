@@ -1,10 +1,13 @@
-package com.adecker.glowplugcompiler;
+package com.adecker.glowplug;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.adecker.glowplugcompiler.GlowplugEntity;
+import com.adecker.glowplugcompiler.GlowplugRelationship;
 
 import java.util.HashSet;
 import java.util.List;
@@ -16,10 +19,10 @@ import java.util.Set;
 public class GlowplugOpenHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "GlowplugOpenHelper";
-    private List<GlowplugEntity> entities;
+    private GlowplugEntity[] entities;
     private Set<GlowplugRelationship> relationships = new HashSet<GlowplugRelationship>();
 
-    public GlowplugOpenHelper(Context context, String name, int version, List<GlowplugEntity> entities) {
+    public GlowplugOpenHelper(Context context, String name, int version, GlowplugEntity[] entities) {
         super(context, name, null, version);
         this.entities = entities;
     }

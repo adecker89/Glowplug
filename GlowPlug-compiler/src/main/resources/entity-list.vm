@@ -4,7 +4,7 @@ import com.adecker.glowplugcompiler.GlowplugEntity;
 
 public class EntityList {
 
-GlowplugEntity[] entities = {
+public static GlowplugEntity[] entities = {
 #foreach($class in $classes)
     new ${class.simpleName}Entity(),
 #end

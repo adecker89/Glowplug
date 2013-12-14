@@ -40,6 +40,9 @@ public class ${className}Entity extends GlowplugEntity{
     public ${className}Entity() {
     }
 
+    public GlowplugAttribute[] attributes;
+    public GlowplugRelationship[] relationships;
+
     @Override
     public String getName() {
         return TABLE_NAME;
@@ -57,12 +60,20 @@ public class ${className}Entity extends GlowplugEntity{
 
     @Override
     public GlowplugAttribute[] getAttributes() {
-        return null;
+        Attribute[] values = Attribute.values();
+        if(attributes == null) {
+            attributes = new GlowplugAttribute[values.length];
+            for(int i=0;i<values.length;i++) {
+                attributes[i] = values[i].getAttribute();
+            }
+        }
+
+        return attributes;
     }
 
     @Override
     public GlowplugRelationship[] getRelationships() {
-        return null;
+        return new GlowplugRelationship[0];
     }
 
 }
