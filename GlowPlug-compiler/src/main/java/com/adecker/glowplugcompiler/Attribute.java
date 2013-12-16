@@ -5,4 +5,5 @@ package com.adecker.glowplugcompiler;
  */
 public @interface Attribute {
 	String localName() default "";
+    String type() default "";
 }

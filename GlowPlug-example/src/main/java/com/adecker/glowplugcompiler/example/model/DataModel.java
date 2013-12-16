@@ -31,6 +31,7 @@ public class DataModel {
 		public double rentalRate;
 		public int length;
 		public double replacementCost;
+        @Attribute(type="INTEGER")
 		public Rating rating;
 		public long lastUpdate;
 	}

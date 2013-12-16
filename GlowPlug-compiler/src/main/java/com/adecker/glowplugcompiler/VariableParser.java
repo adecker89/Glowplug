@@ -1,8 +1,10 @@
 package com.adecker.glowplugcompiler;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.MirroredTypeException;
+import javax.tools.Diagnostic;
 
 /**
  * Created by alex on 12/12/13.
@@ -18,19 +20,40 @@ public class VariableParser {
     }
 
     public GlowplugAttribute parseAttribute() {
-        Attribute columnAnnotation = element.getAnnotation(Attribute.class);
+        String type = null, name = null;
+        Attribute attr = element.getAnnotation(Attribute.class);
 
-        String name = element.getSimpleName().toString();
-
-        String localName = null;
-        if (columnAnnotation != null) {
-            localName = columnAnnotation.localName();
-        }
-        if (localName == null || localName.isEmpty()) {
-            localName = name;
+        if (attr != null) {
+            name = attr.localName();
+            type = attr.type();
         }
 
-        return new GlowplugAttribute(null, name, "");
+        if (name == null || name.isEmpty()) {
+            name = element.getSimpleName().toString();
+        }
+
+        if(type == null || type.isEmpty()) {
+            type = inferSqliteTypeName(element);
+        }
+
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, name +", "+ type);
+        return new GlowplugAttribute(null, name, type);
+    }
+
+    private String inferSqliteTypeName(Element element) {
+        String type = Util.typeToString(element.asType());
+        if(type.equals("java.lang.Long") || type.equals("java.lang.Integer")) {
+            return "INTEGER";
+        } else if(type.equals("java.lang.Double") || type.equals("java.lang.Float")) {
+            return "REAL";
+        } else if(type.equals("java.lang.String")) {
+            return "TEXT";
+        }
+
+        else {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Glowplug: unable to infer sqlite type from: "+type+"\n please provide type using the appropriate annotation");
+            return null;
+        }
     }
 
     public boolean isRelationship() {

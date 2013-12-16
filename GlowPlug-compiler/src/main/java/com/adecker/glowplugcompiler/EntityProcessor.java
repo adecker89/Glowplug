@@ -79,7 +79,7 @@ public class EntityProcessor extends AbstractProcessor {
 		String packageName;
 		String tableName;
 		TypeElement classElement = (TypeElement) e;
-		PackageElement packageElement = getPackage(e);
+		PackageElement packageElement = Util.getPackage(e);
 
 		className = classElement.getSimpleName().toString();
 		packageName = packageElement.getQualifiedName().toString();
@@ -125,7 +125,7 @@ public class EntityProcessor extends AbstractProcessor {
 		if(entities == null || entities.isEmpty()) {
 			return;
 		}
-		String packageName = getPackage(entities.get(0)).getQualifiedName().toString();
+		String packageName = Util.getPackage(entities.get(0)).getQualifiedName().toString();
 		String name = packageName + ".EntityList";
 
 		VelocityContext vc = new VelocityContext();
@@ -156,12 +156,5 @@ public class EntityProcessor extends AbstractProcessor {
 			e1.printStackTrace();
 			processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to write file" + fileName);
 		}
-	}
-
-	public static PackageElement getPackage(Element type) {
-		while (type.getKind() != ElementKind.PACKAGE) {
-			type = type.getEnclosingElement();
-		}
-		return (PackageElement) type;
 	}
 }

@@ -1,7 +1,5 @@
 package com.adecker.glowplugcompiler;
 
-import javax.lang.model.element.VariableElement;
-
 /**
  * Created by alex on 10/29/13.
  */
@@ -9,12 +7,12 @@ public class GlowplugAttribute {
 
     private final String tableName;
     private final String name;
-    private final String type;
+    private final String sqliteType;
 
-    public GlowplugAttribute(String tableName, String name, String type) {
+    public GlowplugAttribute(String tableName, String name, String sqliteType) {
         this.tableName = tableName;
         this.name = name;
-        this.type = type;
+        this.sqliteType = sqliteType;
     }
 
     public String getName() {return name;};
@@ -25,7 +23,7 @@ public class GlowplugAttribute {
         return tableName + "." + getLocalName();
     }
 
-    public String getSqliteType() {return type;};
+    public String getSqliteType() {return sqliteType;};
     public String[] getConstraints() {return new String[0];};
 
 
