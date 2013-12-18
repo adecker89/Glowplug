@@ -10,6 +10,7 @@ import javax.tools.Diagnostic;
  * Created by alex on 12/12/13.
  */
 public class VariableParser {
+    public static final String ID_PRIMARYKEY_COLUMN = "_id";
     private final VariableElement element;
 	private final ProcessingEnvironment processingEnv;
 
@@ -21,11 +22,13 @@ public class VariableParser {
 
     public GlowplugAttribute parseAttribute() {
         String type = null, name = null;
+        boolean primaryKey = false;
         Attribute attr = element.getAnnotation(Attribute.class);
 
         if (attr != null) {
             name = attr.localName();
             type = attr.type();
+            primaryKey = attr.primaryKey();
         }
 
         if (name == null || name.isEmpty()) {
@@ -37,12 +40,12 @@ public class VariableParser {
         }
 
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, name +", "+ type);
-        return new GlowplugAttribute(null, name, type);
+        return new GlowplugAttribute(null, name, type).setPrimaryKey(primaryKey);
     }
 
     private String inferSqliteTypeName(Element element) {
         String type = Util.typeToString(element.asType());
-        if(type.equals("java.lang.Long") || type.equals("java.lang.Integer")) {
+        if(type.equals("java.lang.Long") || type.equals("java.lang.Integer") || type.equals("java.lang.Boolean")) {
             return "INTEGER";
         } else if(type.equals("java.lang.Double") || type.equals("java.lang.Float")) {
             return "REAL";

@@ -13,26 +13,4 @@ public abstract class GlowplugEntity {
 
     public abstract GlowplugAttribute[] getAttributes();
     public abstract GlowplugRelationship[] getRelationships();
-
-    public String getCreateSql() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE ").append(getLocalName()).append(" (");
-
-        for(GlowplugAttribute attr : getAttributes()) {
-            sb.append(attr.getCreateSql());
-            sb.append(",");
-        }
-
-	    for(GlowplugRelationship rel : getRelationships()) {
-		    if(!rel.isManyToMany()) {
-			    sb.append(rel.getCreateSql());
-			    sb.append(",");
-		    }
-	    }
-
-        sb.setLength(sb.length() - 1); //remove trailing comma
-        sb.append(");");
-
-        return sb.toString();
-    }
 }

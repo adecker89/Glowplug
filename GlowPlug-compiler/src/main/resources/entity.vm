@@ -15,7 +15,7 @@ public class ${className}Entity extends GlowplugEntity{
 
     public static enum Attribute {
     #foreach($attr in $attrs)
-        ${attr.name.toUpperCase()}(new GlowplugAttribute(TABLE_NAME,"$attr.localName","$attr.sqliteType")),
+        ${attr.name.toUpperCase()}(new GlowplugAttribute(TABLE_NAME,"$attr.localName","$attr.sqliteType") #if($attr.primaryKey).setPrimaryKey(true)#end),
     #end
         ;
 

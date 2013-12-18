@@ -58,27 +58,4 @@ public class GlowplugRelationship {
 			return tableName + "_" + foreignTable;
 		}
 	}
-
-	public String getCreateSql() {
-		if (manyToMany) {
-			return "";
-		} else {
-			StringBuilder sb = new StringBuilder();
-			sb.append(getLocalName());
-			sb.append(" INTEGER ");
-
-			sb.append("REFERENCES ");
-			sb.append(foreignTable);
-			sb.append("(");
-			sb.append(foreignKey);
-			sb.append(") ");
-
-			for (String constraint : getConstraints()) {
-				sb.append(constraint);
-				sb.append(" ");
-			}
-
-			return sb.toString();
-		}
-	}
 }
