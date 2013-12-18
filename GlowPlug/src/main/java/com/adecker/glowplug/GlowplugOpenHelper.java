@@ -97,7 +97,15 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
         for(GlowplugAttribute attr : entity.getAttributes()) {
             sb.append(getCreateSqlForAttribute(attr));
             if(attr.isPrimaryKey() && primaryKeys.size() == 1) {
-                sb.append(" PRIMARY KEY");
+                sb.append("PRIMARY KEY ");
+                String primaryKeyConflictClause = attr.getPrimaryKeyConflictClause();
+                if(!primaryKeyConflictClause.isEmpty()) {
+                    sb.append(primaryKeyConflictClause);
+                    sb.append(" ");
+                }
+                if(attr.isAutoIncrement()) {
+                    sb.append("AUTOINCREMENT ");
+                }
             }
 
             sb.append(",");

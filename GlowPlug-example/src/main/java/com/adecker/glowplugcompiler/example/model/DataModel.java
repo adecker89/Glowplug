@@ -25,7 +25,7 @@ public class DataModel {
 
 	@Entity
 	public static class Film {
-        @Attribute(primaryKey = true)
+        @Attribute(primaryKey = true, constaints = {""})
 		public long _id;
 		public String title;
 		public String description;
@@ -45,7 +45,7 @@ public class DataModel {
 
 	@Entity
 	public static class City {
-        @Attribute(primaryKey = true)
+        @Attribute(primaryKey = true, autoIncrement = true)
 		public long _id;
 		public String city;
 
@@ -56,7 +56,7 @@ public class DataModel {
 
 	@Entity
 	public static class Country {
-        @Attribute(primaryKey = true)
+        @Attribute(primaryKey = true, primaryKeyContraint = "ON CONFLICT REPLACE")
 		public long _id;
 		public String country;
 		public long lastUpdate;

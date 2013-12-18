@@ -7,4 +7,7 @@ public @interface Attribute {
 	String localName() default "";
     String type() default "";
     boolean primaryKey() default false;
+    String primaryKeyContraint() default "";
+    boolean autoIncrement() default false;
+    String[] constaints() default {};
 }

@@ -21,26 +21,28 @@ public class VariableParser {
     }
 
     public GlowplugAttribute parseAttribute() {
-        String type = null, name = null;
-        boolean primaryKey = false;
+        String type = "", name = "", primaryKeyConstraint = "";
+        boolean primaryKey = false, autoIncrement = false;
         Attribute attr = element.getAnnotation(Attribute.class);
 
         if (attr != null) {
             name = attr.localName();
             type = attr.type();
             primaryKey = attr.primaryKey();
+            primaryKeyConstraint = attr.primaryKeyContraint();
+            autoIncrement = attr.autoIncrement();
         }
 
-        if (name == null || name.isEmpty()) {
+        if (name.isEmpty()) {
             name = element.getSimpleName().toString();
         }
 
-        if(type == null || type.isEmpty()) {
+        if(type.isEmpty()) {
             type = inferSqliteTypeName(element);
         }
 
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, name +", "+ type);
-        return new GlowplugAttribute(null, name, type).setPrimaryKey(primaryKey);
+        return new GlowplugAttribute(null, name, type).setPrimaryKey(primaryKey,autoIncrement,primaryKeyConstraint);
     }
 
     private String inferSqliteTypeName(Element element) {

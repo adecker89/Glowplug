@@ -8,16 +8,21 @@ public class ${className}Entity extends GlowplugEntity{
     public static final String TABLE_NAME = "${tableName}";
 
     public static class AttributeNames {
-    #foreach($attr in $attrs)
+#foreach($attr in $attrs)
         public static final String ${attr.name.toUpperCase()} = "$attr.localName";
-    #end
+#end
     }
 
     public static enum Attribute {
-    #foreach($attr in $attrs)
-        ${attr.name.toUpperCase()}(new GlowplugAttribute(TABLE_NAME,"$attr.localName","$attr.sqliteType") #if($attr.primaryKey).setPrimaryKey(true)#end),
-    #end
-        ;
+#foreach($attr in $attrs)
+        ${attr.name.toUpperCase()}(new GlowplugAttribute(TABLE_NAME,"$attr.localName","$attr.sqliteType")
+#if($attr.primaryKey)
+            .setPrimaryKey(true,$attr.autoIncrement,"$attr.primaryKeyConflictClause")
+#end
+#foreach($constraint in $attr.constaints)
+            .addConstraint("$constraint");
+#end        ),
+#end        ;
 
         private GlowplugAttribute attr;
         private Attribute(GlowplugAttribute attr) {
@@ -38,15 +43,15 @@ public class ${className}Entity extends GlowplugEntity{
     }
 
     public static class RelationshipNames {
-    #foreach($relationship in $relationships)
+ #foreach($relationship in $relationships)
         public static final String ${relationship.name.toUpperCase()} = "$relationship.localName";
-    #end
+ #end
     }
 
     public static enum Relationship {
-    #foreach($relationship in $relationships)
+ #foreach($relationship in $relationships)
         ${relationship.localName.toUpperCase()}(new GlowplugRelationship(TABLE_NAME,"$relationship.localName","$relationship.foreignTable", "$relationship.foreignKey")),
-    #end
+ #end
         ;
 
         private GlowplugRelationship relationship;
