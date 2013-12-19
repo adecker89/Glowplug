@@ -38,7 +38,7 @@ public class DataModel {
 		public double rentalRate;
 		public int length;
 		public double replacementCost;
-        @Attribute(type="INTEGER")
+        @Attribute(sqliteType="INTEGER")
 		public Rating rating;
 		public long lastUpdate;
 	}
@@ -78,7 +78,7 @@ public class DataModel {
 
     @Entity
     public static class Language {
-        @Attribute(localName = "_id",primaryKey = true)
+        @Attribute(sqliteName = "_id",primaryKey = true)
         public long id;
         public String name;
         public long lastUpdate;
@@ -113,13 +113,13 @@ public class DataModel {
 
     @Entity
     public static class Staff {
-        @Attribute(primaryKey = true)
-        public long _id;
+        @Attribute(sqliteName = "_id", primaryKey = true)
+        public long id;
         public String firstName;
         public String lastName;
         @Relationship(table = Address.class, key = "_id")
         public long address;
-        @Attribute(type = "BLOB")
+        @Attribute(sqliteType = "BLOB")
         public Bitmap picture;
         public String email;
         public boolean active;

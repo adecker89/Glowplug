@@ -21,44 +21,17 @@ public class VariableParser {
     }
 
     public GlowplugAttribute parseAttribute() {
-        String type = "", name = "", primaryKeyConstraint = "";
-        boolean primaryKey = false, autoIncrement = false;
-        Attribute attr = element.getAnnotation(Attribute.class);
-
-        if (attr != null) {
-            name = attr.localName();
-            type = attr.type();
-            primaryKey = attr.primaryKey();
-            primaryKeyConstraint = attr.primaryKeyContraint();
-            autoIncrement = attr.autoIncrement();
-        }
-
-        if (name.isEmpty()) {
-            name = element.getSimpleName().toString();
-        }
-
-        if(type.isEmpty()) {
-            type = inferSqliteTypeName(element);
-        }
-
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, name +", "+ type);
-        return new GlowplugAttribute(null, name, type).setPrimaryKey(primaryKey,autoIncrement,primaryKeyConstraint);
-    }
-
-    private String inferSqliteTypeName(Element element) {
+        String name = element.getSimpleName().toString();
         String type = Util.typeToString(element.asType());
-        if(type.equals("java.lang.Long") || type.equals("java.lang.Integer") || type.equals("java.lang.Boolean")) {
-            return "INTEGER";
-        } else if(type.equals("java.lang.Double") || type.equals("java.lang.Float")) {
-            return "REAL";
-        } else if(type.equals("java.lang.String")) {
-            return "TEXT";
-        }
+        GlowplugAttribute attr = new GlowplugAttribute(null, name, type);
 
-        else {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Glowplug: unable to infer sqlite type from: "+type+"\n please provide type using the appropriate annotation");
-            return null;
+        Attribute attrAnnotation = element.getAnnotation(Attribute.class);
+        if (attrAnnotation != null) {
+            attr.setPrimaryKey(attrAnnotation.primaryKey(), attrAnnotation.autoIncrement(), attrAnnotation.primaryKeyContraint());
+            attr.setSqliteName(attrAnnotation.sqliteName());
+            attr.setSqliteType(attrAnnotation.sqliteType());
         }
+        return attr;
     }
 
     public boolean isRelationship() {

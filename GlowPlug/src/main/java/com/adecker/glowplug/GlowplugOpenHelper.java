@@ -10,6 +10,8 @@ import com.adecker.glowplugcompiler.GlowplugAttribute;
 import com.adecker.glowplugcompiler.GlowplugEntity;
 import com.adecker.glowplugcompiler.GlowplugRelationship;
 
+import junit.framework.Assert;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -127,10 +129,15 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
     }
 
     public String getCreateSqlForAttribute(GlowplugAttribute attr) {
+        String type = attr.getSqliteType();
+        if(type.isEmpty()) {
+            type = inferSqliteTypeName(attr);
+        }
+
         StringBuilder sb = new StringBuilder();
-        sb.append(attr.getLocalName());
+        sb.append(attr.getSqliteName());
         sb.append(" ");
-        sb.append(attr.getSqliteType());
+        sb.append(type);
         sb.append(" ");
         for(String constraint : attr.getConstraints()) {
             sb.append(constraint);
@@ -138,6 +145,21 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
         }
 
         return sb.toString();
+    }
+
+    private String inferSqliteTypeName(GlowplugAttribute attr) {
+        String type = attr.getType();
+        if(type.equals("java.lang.Long") || type.equals("java.lang.Integer") || type.equals("java.lang.Boolean")) {
+            return "INTEGER";
+        } else if(type.equals("java.lang.Double") || type.equals("java.lang.Float")) {
+            return "REAL";
+        } else if(type.equals("java.lang.String")) {
+            return "TEXT";
+        }
+
+        else {
+            throw new AssertionError("Glowplug was unable to infer sqlite type for "+attr.getFQName()+" with type: "+type+"\n please provide an explicit type using the appropriate annotation");
+        }
     }
 
     public String getCreateSqlForRelationship(GlowplugRelationship rel) {

@@ -9,18 +9,24 @@ public class ${className}Entity extends GlowplugEntity{
 
     public static class AttributeNames {
 #foreach($attr in $attrs)
-        public static final String ${attr.name.toUpperCase()} = "$attr.localName";
+        public static final String ${attr.name.toUpperCase()} = "$attr.sqliteName";
 #end
     }
 
     public static enum Attribute {
 #foreach($attr in $attrs)
-        ${attr.name.toUpperCase()}(new GlowplugAttribute(TABLE_NAME,"$attr.localName","$attr.sqliteType")
+        ${attr.name.toUpperCase()}(new GlowplugAttribute(TABLE_NAME,"$attr.name","$attr.type")
 #if($attr.primaryKey)
             .setPrimaryKey(true,$attr.autoIncrement,"$attr.primaryKeyConflictClause")
 #end
+#if($attr.sqliteName != $attr.name)
+            .setSqliteName("$attr.sqliteName")
+#end
+#if(!$attr.sqliteType.isEmpty())
+            .setSqliteType("$attr.sqliteType")
+#end
 #foreach($constraint in $attr.constaints)
-            .addConstraint("$constraint");
+            .addConstraint("$constraint")
 #end        ),
 #end        ;
 
