@@ -1,7 +1,10 @@
 package com.adecker.glowplugcompiler;
 
+import com.adecker.glowplugannotations.Attribute;
+import com.adecker.glowplugannotations.GlowplugType;
+import com.adecker.glowplugannotations.Relationship;
+
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.MirroredTypeException;
 import javax.tools.Diagnostic;
@@ -10,7 +13,6 @@ import javax.tools.Diagnostic;
  * Created by alex on 12/12/13.
  */
 public class VariableParser {
-    public static final String ID_PRIMARYKEY_COLUMN = "_id";
     private final VariableElement element;
 	private final ProcessingEnvironment processingEnv;
 
@@ -20,17 +22,34 @@ public class VariableParser {
 
     }
 
-    public GlowplugAttribute parseAttribute() {
-        String name = element.getSimpleName().toString();
-        String type = Util.typeToString(element.asType());
-        GlowplugAttribute attr = new GlowplugAttribute(null, name, type);
+    public AttributeStruct parseAttribute() {
+        AttributeStruct attr = new AttributeStruct();
+        attr.name = element.getSimpleName().toString();
+        attr.type = GlowplugType.fromTypeName(Util.typeToString(element.asType()));
+
+        if(attr.type == null) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,"Glowplug: attempted to add "+attr.name+" with unsupported type: "+Util.typeToString(element.asType()));
+            return null;
+        }
 
         Attribute attrAnnotation = element.getAnnotation(Attribute.class);
         if (attrAnnotation != null) {
-            attr.setPrimaryKey(attrAnnotation.primaryKey(), attrAnnotation.autoIncrement(), attrAnnotation.primaryKeyContraint());
-            attr.setSqliteName(attrAnnotation.sqliteName());
-            attr.setSqliteType(attrAnnotation.sqliteType());
+            attr.primaryKey = attrAnnotation.primaryKey();
+            attr.autoIncrement = attrAnnotation.autoIncrement();
+            attr.primaryKeyConflictClause =  attrAnnotation.primaryKeyConflict();
+            attr.sqliteName = attrAnnotation.sqliteName();
+            attr.sqliteType = attrAnnotation.sqliteType();
+            attr.remoteName = attrAnnotation.remoteName();
         }
+
+        if(attr.sqliteName == null || attr.sqliteName.isEmpty()) {
+            attr.sqliteName = attr.name;
+        }
+
+        if(attr.remoteName == null || attr.remoteName.isEmpty()) {
+            attr.remoteName = attr.name;
+        }
+
         return attr;
     }
 
@@ -38,30 +57,98 @@ public class VariableParser {
         return element.getAnnotation(Relationship.class) != null;
     }
 
-    public GlowplugRelationship parseRelationship() {
+    public RelationStruct parseRelationship() {
         Relationship rel = element.getAnnotation(Relationship.class);
+        RelationStruct relationship = new RelationStruct();
 
-        String name = element.getSimpleName().toString();
+        relationship.name = element.getSimpleName().toString();
+        relationship.localName = rel.localName();
+        relationship.foreignTable = getRelationshipType(rel);
+        relationship.foreignKey = rel.key();
 
-        String localName = null;
-        localName = rel.localName();
-
-        if (localName == null || localName.isEmpty()) {
-            localName = name;
+        if(relationship.localName == null || relationship.localName.isEmpty()) {
+            relationship.localName = relationship.name;
         }
 
-        return new GlowplugRelationship(null,localName,getRelationshipType(rel),rel.key());
-
+        return relationship;
     }
 
 	public String getRelationshipType(Relationship rel) {
 		try {
 			rel.table();
 		} catch (MirroredTypeException e) {
-
-
 			return processingEnv.getElementUtils().getTypeElement(e.getTypeMirror().toString()).getSimpleName().toString();
 		}
 		return null;
 	}
+
+    public static class RelationStruct {
+        public String name;
+        public String localName;
+        public String foreignTable;
+        public String foreignKey;
+
+        public String getName() {
+            return name;
+        }
+
+        public String getLocalName() {
+            return localName;
+        }
+
+        public String getForeignTable() {
+            return foreignTable;
+        }
+
+        public String getForeignKey() {
+            return foreignKey;
+        }
+    }
+
+    public static class AttributeStruct {
+        public String name;
+        public GlowplugType type;
+        public String sqliteName;
+        public String sqliteType = "";
+        public String remoteName;
+        public boolean primaryKey;
+        public boolean autoIncrement;
+        public String primaryKeyConflictClause;
+
+        public String getName() {
+            return name;
+        }
+
+        public String getGlowplugType() {
+            return type.toString();
+        }
+
+        public String getSimpleType() {
+            return type.getSimpleName();
+        }
+
+        public String getSqliteName() {
+            return sqliteName;
+        }
+
+        public String getSqliteType() {
+            return sqliteType;
+        }
+
+        public String getRemoteName() {
+            return remoteName;
+        }
+
+        public boolean isPrimaryKey() {
+            return primaryKey;
+        }
+
+        public boolean isAutoIncrement() {
+            return autoIncrement;
+        }
+
+        public String getPrimaryKeyConflictClause() {
+            return primaryKeyConflictClause;
+        }
+    }
 }

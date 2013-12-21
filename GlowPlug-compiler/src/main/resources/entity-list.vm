@@ -1,6 +1,6 @@
 package ${packageName};
 
-import com.adecker.glowplugcompiler.GlowplugEntity;
+import com.adecker.glowplug.GlowplugEntity;
 
 public class EntityList {
 

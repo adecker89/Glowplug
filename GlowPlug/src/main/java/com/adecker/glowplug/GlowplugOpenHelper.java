@@ -6,11 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.adecker.glowplugcompiler.GlowplugAttribute;
-import com.adecker.glowplugcompiler.GlowplugEntity;
-import com.adecker.glowplugcompiler.GlowplugRelationship;
-
-import junit.framework.Assert;
+import com.adecker.glowplugannotations.GlowplugType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -41,9 +37,9 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
 
         for (GlowplugEntity entity : entities) {
             for (GlowplugRelationship relationship : entity.getRelationships()) {
-	            if(relationship.isManyToMany()) {
+                if (relationship.isManyToMany()) {
                     relationshipTables.add(relationship);
-	            }
+                }
             }
 
             String command = getCreateSqlForEntity(entity);
@@ -53,7 +49,7 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
             }
         }
 
-        for(GlowplugRelationship relationship : relationshipTables) {
+        for (GlowplugRelationship relationship : relationshipTables) {
             String command = getCreateSqlForRelationship(relationship);
             if (!TextUtils.isEmpty(command)) {
                 db.execSQL(command);
@@ -65,21 +61,21 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-	    String dropSql = "DROP TABLE IF EXISTS ";
-	    for (GlowplugEntity entity : entities) {
-		    for (GlowplugRelationship relationship : entity.getRelationships()) {
-			    if(relationship.isManyToMany()) {
-				    String command = dropSql + relationship.getManyToManyTableName();
-				    db.execSQL(command);
-				    Log.v(TAG, "dropping table with command: " + command);
-			    }
-		    }
-		    String command = dropSql + entity.getLocalName();
-		    db.execSQL(command);
-		    Log.v(TAG, "dropping table with command: " + command);
-	    }
+        String dropSql = "DROP TABLE IF EXISTS ";
+        for (GlowplugEntity entity : entities) {
+            for (GlowplugRelationship relationship : entity.getRelationships()) {
+                if (relationship.isManyToMany()) {
+                    String command = dropSql + relationship.getManyToManyTableName();
+                    db.execSQL(command);
+                    Log.v(TAG, "dropping table with command: " + command);
+                }
+            }
+            String command = dropSql + entity.getEntitySqliteName();
+            db.execSQL(command);
+            Log.v(TAG, "dropping table with command: " + command);
+        }
 
-	    onCreate(db);
+        onCreate(db);
     }
 
 
@@ -88,24 +84,24 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
 
 
         StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE ").append(entity.getLocalName()).append(" (");
+        sb.append("CREATE TABLE ").append(entity.getEntitySqliteName()).append(" (");
 
-        for(GlowplugAttribute attr : entity.getAttributes()) {
-            if(attr.isPrimaryKey()) {
+        for (GlowplugAttribute attr : entity.getAttributes()) {
+            if (attr.isPrimaryKey()) {
                 primaryKeys.add(attr);
             }
         }
 
-        for(GlowplugAttribute attr : entity.getAttributes()) {
+        for (GlowplugAttribute attr : entity.getAttributes()) {
             sb.append(getCreateSqlForAttribute(attr));
-            if(attr.isPrimaryKey() && primaryKeys.size() == 1) {
+            if (attr.isPrimaryKey() && primaryKeys.size() == 1) {
                 sb.append("PRIMARY KEY ");
                 String primaryKeyConflictClause = attr.getPrimaryKeyConflictClause();
-                if(!primaryKeyConflictClause.isEmpty()) {
+                if (!primaryKeyConflictClause.isEmpty()) {
                     sb.append(primaryKeyConflictClause);
                     sb.append(" ");
                 }
-                if(attr.isAutoIncrement()) {
+                if (attr.isAutoIncrement()) {
                     sb.append("AUTOINCREMENT ");
                 }
             }
@@ -113,8 +109,8 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
             sb.append(",");
         }
 
-        for(GlowplugRelationship rel : entity.getRelationships()) {
-            if(!rel.isManyToMany()) {
+        for (GlowplugRelationship rel : entity.getRelationships()) {
+            if (!rel.isManyToMany()) {
                 sb.append(getCreateSqlForRelationship(rel));
                 sb.append(",");
             }
@@ -130,7 +126,7 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
 
     public String getCreateSqlForAttribute(GlowplugAttribute attr) {
         String type = attr.getSqliteType();
-        if(type.isEmpty()) {
+        if (type.isEmpty()) {
             type = inferSqliteTypeName(attr);
         }
 
@@ -139,7 +135,7 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
         sb.append(" ");
         sb.append(type);
         sb.append(" ");
-        for(String constraint : attr.getConstraints()) {
+        for (String constraint : attr.getConstraints()) {
             sb.append(constraint);
             sb.append(" ");
         }
@@ -148,17 +144,19 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
     }
 
     private String inferSqliteTypeName(GlowplugAttribute attr) {
-        String type = attr.getType();
-        if(type.equals("java.lang.Long") || type.equals("java.lang.Integer") || type.equals("java.lang.Boolean")) {
-            return "INTEGER";
-        } else if(type.equals("java.lang.Double") || type.equals("java.lang.Float")) {
-            return "REAL";
-        } else if(type.equals("java.lang.String")) {
-            return "TEXT";
-        }
-
-        else {
-            throw new AssertionError("Glowplug was unable to infer sqlite type for "+attr.getFQName()+" with type: "+type+"\n please provide an explicit type using the appropriate annotation");
+        GlowplugType type = attr.getType();
+        switch (type) {
+            case LONG:
+            case INTEGER:
+            case BOOLEAN:
+                return "INTEGER";
+            case DOUBLE:
+            case FLOAT:
+                return "REAL";
+            case STRING:
+                return "TEXT";
+            default:
+                throw new AssertionError("Glowplug was unable to infer sqlite type for " + attr.getFQName() + " with type: " + type + "\n please provide an explicit type using the appropriate annotation");
         }
     }
 
@@ -168,7 +166,7 @@ public class GlowplugOpenHelper extends SQLiteOpenHelper {
             return "";
         } else {
             StringBuilder sb = new StringBuilder();
-            sb.append(rel.getLocalName());
+            sb.append(rel.getSqliteName());
             sb.append(" INTEGER ");
 
             sb.append("REFERENCES ");

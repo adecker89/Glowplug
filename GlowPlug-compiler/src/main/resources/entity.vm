@@ -1,8 +1,13 @@
 package ${packageName};
 
-import com.adecker.glowplugcompiler.GlowplugAttribute;
-import com.adecker.glowplugcompiler.GlowplugEntity;
-import com.adecker.glowplugcompiler.GlowplugRelationship;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.util.JsonReader;
+
+import com.adecker.glowplug.GlowplugAttribute;
+import com.adecker.glowplug.GlowplugEntity;
+import com.adecker.glowplug.GlowplugRelationship;
+import com.adecker.glowplugannotations.GlowplugType;
 
 public class ${className}Entity extends GlowplugEntity{
     public static final String TABLE_NAME = "${tableName}";
@@ -15,9 +20,12 @@ public class ${className}Entity extends GlowplugEntity{
 
     public static enum Attribute {
 #foreach($attr in $attrs)
-        ${attr.name.toUpperCase()}(new GlowplugAttribute(TABLE_NAME,"$attr.name","$attr.type")
+        ${attr.name.toUpperCase()}(new GlowplugAttribute(TABLE_NAME,"$attr.name",GlowplugType.$attr.glowplugType)
 #if($attr.primaryKey)
             .setPrimaryKey(true,$attr.autoIncrement,"$attr.primaryKeyConflictClause")
+#end
+#if($attr.remoteName != $attr.name)
+            .setRemoteName("$attr.remoteName")
 #end
 #if($attr.sqliteName != $attr.name)
             .setSqliteName("$attr.sqliteName")
@@ -78,24 +86,37 @@ public class ${className}Entity extends GlowplugEntity{
         }
     }
 
+    private GlowplugAttribute[] attributes;
+    private GlowplugRelationship[] relationships;
+
     public ${className}Entity() {
+        super();
     }
 
-    public GlowplugAttribute[] attributes;
-    public GlowplugRelationship[] relationships;
+    public ${className}Entity(JsonReader reader) throws IllegalStateException {
+        super(reader);
+    }
+
+    public ${className}Entity(Cursor cursor, int index) {
+        super(cursor,index);
+    }
+
+    public ${className}Entity(Cursor cursor, int index, String[] projection) {
+        super(cursor,index,projection);
+    }
 
     @Override
-    public String getName() {
+    public String getEntityName() {
         return TABLE_NAME;
     }
 
     @Override
-    public String getLocalName() {
+    public String getEntitySqliteName() {
         return TABLE_NAME;
     }
 
     @Override
-    public String getRemoteName() {
+    public String getEntityRemoteName() {
         return TABLE_NAME;
     }
 
@@ -125,4 +146,13 @@ public class ${className}Entity extends GlowplugEntity{
         return relationships;
     }
 
+#foreach($attr in $attrs)
+    public $attr.simpleType get${display.capitalize($attr.name)}() {
+        return ($attr.simpleType) getAttributeInternal(Attribute.${attr.name.toUpperCase()}.getAttribute());
+    }
+
+    public void set${display.capitalize($attr.name)}($attr.simpleType $attr.name) {
+        setAttributeInternal(Attribute.${attr.name.toUpperCase()}.getAttribute(),$attr.name);
+    }
+#end
 }

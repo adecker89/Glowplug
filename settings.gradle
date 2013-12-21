@@ -1,1 +1,1 @@
-include ':SmartCursor', ':JavaTest', ':GlowPlug-example', ':GlowPlug-compiler', ':GlowPlug', ':GlowPlug'
+include ':GlowPlug-example', ':GlowPlug-compiler', ':GlowPlug', ':GlowPlug', ':Glowplug-annotations'

@@ -27,9 +27,12 @@ android {
     }
 }
 
+
+
 dependencies {
 
     dependencies {
-        compile project(':GlowPlug-compiler')
+        compile project(':Glowplug-annotations')
+        //compile project(':GlowPlug-compiler')
     }
 }

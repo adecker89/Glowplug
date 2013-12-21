@@ -1,10 +1,8 @@
 package com.adecker.glowplugcompiler.example.model;
 
-import android.graphics.Bitmap;
-
-import com.adecker.glowplugcompiler.Attribute;
-import com.adecker.glowplugcompiler.Entity;
-import com.adecker.glowplugcompiler.Relationship;
+import com.adecker.glowplugannotations.Entity;
+import com.adecker.glowplugannotations.Attribute;
+import com.adecker.glowplugannotations.Relationship;
 
 
 /**
@@ -18,7 +16,9 @@ public class DataModel {
 	@Entity
 	public static class Actor {
 		public long _id;
+        @Attribute(remoteName = "first_name")
 		public String firstName;
+        @Attribute(remoteName = "last_name")
 		public String lastName;
 		public long lastUpdate;
 	}
@@ -39,7 +39,7 @@ public class DataModel {
 		public int length;
 		public double replacementCost;
         @Attribute(sqliteType="INTEGER")
-		public Rating rating;
+		public int rating;
 		public long lastUpdate;
 	}
 
@@ -56,7 +56,7 @@ public class DataModel {
 
 	@Entity
 	public static class Country {
-        @Attribute(primaryKey = true, primaryKeyContraint = "ON CONFLICT REPLACE")
+        @Attribute(primaryKey = true, primaryKeyConflict = "ON CONFLICT REPLACE")
 		public long _id;
 		public String country;
 		public long lastUpdate;
@@ -120,7 +120,7 @@ public class DataModel {
         @Relationship(table = Address.class, key = "_id")
         public long address;
         @Attribute(sqliteType = "BLOB")
-        public Bitmap picture;
+        public byte[] picture;
         public String email;
         public boolean active;
         public String username;
