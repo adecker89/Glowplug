@@ -58,15 +58,20 @@ public class ${className}Entity extends GlowplugEntity{
 
     public static class RelationshipNames {
  #foreach($relationship in $relationships)
-        public static final String ${relationship.name.toUpperCase()} = "$relationship.localName";
+        public static final String ${relationship.name.toUpperCase()} = "$relationship.sqliteName";
  #end
     }
 
     public static enum Relationship {
- #foreach($relationship in $relationships)
-        ${relationship.localName.toUpperCase()}(new GlowplugRelationship(TABLE_NAME,"$relationship.localName","$relationship.foreignTable", "$relationship.foreignKey")),
- #end
-        ;
+#foreach($relationship in $relationships)
+        ${relationship.name.toUpperCase()}(new GlowplugRelationship(TABLE_NAME,"$relationship.sqliteName","$relationship.foreignTable", "$relationship.foreignKey")
+#if($relationship.remoteName != $relationship.name)
+            .setRemoteName("$relationship.remoteName")
+#end
+#if($relationship.sqliteName != $relationship.name)
+            .setSqliteName("$relationship.sqliteName")
+#end        ),
+#end        ;
 
         private GlowplugRelationship relationship;
         private Relationship(GlowplugRelationship relationship) {
@@ -148,11 +153,21 @@ public class ${className}Entity extends GlowplugEntity{
 
 #foreach($attr in $attrs)
     public $attr.simpleType get${display.capitalize($attr.name)}() {
-        return ($attr.simpleType) getAttributeInternal(Attribute.${attr.name.toUpperCase()}.getAttribute());
+        return ($attr.simpleType) getPropertyInternal(Attribute.${attr.name.toUpperCase()}.getAttribute());
     }
 
     public void set${display.capitalize($attr.name)}($attr.simpleType $attr.name) {
-        setAttributeInternal(Attribute.${attr.name.toUpperCase()}.getAttribute(),$attr.name);
+        setPropertyInternal(Attribute.${attr.name.toUpperCase()}.getAttribute(),$attr.name);
     }
 #end
+
+#foreach($relationship in $relationships)
+    public Long get${display.capitalize($relationship.name)}() {
+       return (Long) getPropertyInternal(Relationship.${relationship.name.toUpperCase()}.getRelationship());
+    }
+
+    public void set${display.capitalize($relationship.name)}(Long $relationship.name) {
+       setPropertyInternal(Relationship.${relationship.name.toUpperCase()}.getRelationship(),$relationship.name);
+    }
+ #end
 }

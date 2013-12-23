@@ -1,7 +1,7 @@
 package com.adecker.glowplugcompiler.example.model;
 
-import com.adecker.glowplugannotations.Entity;
 import com.adecker.glowplugannotations.Attribute;
+import com.adecker.glowplugannotations.Entity;
 import com.adecker.glowplugannotations.Relationship;
 
 
@@ -15,11 +15,29 @@ public class DataModel {
 
 	@Entity
 	public static class Actor {
-		public long _id;
+		@Attribute(primaryKey = true, autoIncrement = true, sqliteName = "_id", remoteName="actor_id")
+		public long id;
         @Attribute(remoteName = "first_name")
 		public String firstName;
         @Attribute(remoteName = "last_name")
 		public String lastName;
+		@Attribute(remoteName = "last_update")
+		public long lastUpdate;
+	}
+
+	@Entity
+	public static class Address {
+		@Attribute(primaryKey = true, autoIncrement = true, sqliteName = "_id", remoteName="address_id")
+		public long id;
+		public String address;
+		public String address2;
+		public String district;
+		@Relationship(table=City.class, key="_id", remoteName="city_id")
+		public long city;
+		@Attribute(remoteName = "postal_code")
+		public String postalCode;
+		public String phone;
+		@Attribute(remoteName = "last_update")
 		public long lastUpdate;
 	}
 
@@ -63,20 +81,6 @@ public class DataModel {
 	}
 
     @Entity
-    public static class Address {
-        @Attribute(primaryKey = true)
-        public long _id;
-        public String address;
-        public String address2;
-        public String district;
-        @Relationship(table=City.class, key="_id")
-        public long city;
-        public String postalCode;
-        public String phone;
-        public long lastUpdate;
-    }
-
-    @Entity
     public static class Language {
         @Attribute(sqliteName = "_id",primaryKey = true)
         public long id;
@@ -88,7 +92,7 @@ public class DataModel {
     public static class Customer {
         @Attribute(primaryKey = true)
         public long _id;
-        @Relationship(table=Store.class, key="_id", localName = "store")
+        @Relationship(table=Store.class, key="_id", sqliteName = "store")
         public long homeStore;
         public String firstName;
         public String lastName;

@@ -41,27 +41,35 @@ public abstract class GlowplugEntity {
 				if (property != null) {
 					switch (reader.peek()) {
 						case STRING:
-							setAttributeInternal(property, reader.nextString());
+							setPropertyInternal(property, reader.nextString());
 							break;
 						case NUMBER:
 							switch (property.getType()) {
 								case LONG:
-									setAttributeInternal(property, reader.nextLong());
+									setPropertyInternal(property, reader.nextLong());
 									break;
 								case INTEGER:
-									setAttributeInternal(property, reader.nextInt());
+									setPropertyInternal(property, reader.nextInt());
 									break;
 								case DOUBLE:
 								case FLOAT:
-									setAttributeInternal(property, reader.nextDouble());
+									setPropertyInternal(property, reader.nextDouble());
+									break;
+								case STRING:
+									setPropertyInternal(property, reader.nextString());
+									break;
+								default:
+									Log.d(TAG,"skipping "+property.getType());
+									reader.skipValue();
 									break;
 							}
 							break;
 						case BOOLEAN:
-							setAttributeInternal(property, reader.nextBoolean());
+							setPropertyInternal(property, reader.nextBoolean());
 							break;
 						case NULL:
-							setAttributeInternalNull(property);
+							reader.nextNull();
+							setPropertyInternalNull(property);
 							break;
 					}
 				} else {
@@ -92,42 +100,42 @@ public abstract class GlowplugEntity {
 
 	public abstract GlowplugAttribute[] getAttributes();
 
-	protected void setAttributeInternalNull(GlowplugProperty property) {
+	protected void setPropertyInternalNull(GlowplugProperty property) {
 		if(values == null) {
 			values = new ContentValues();
 		}
 		values.putNull(property.getSqliteName());
 	}
 
-	protected void setAttributeInternal(GlowplugProperty property, boolean value) {
+	protected void setPropertyInternal(GlowplugProperty property, boolean value) {
 		if(values == null) {
 			values = new ContentValues();
 		}
 		values.put(property.getSqliteName(), value);
 	}
 
-	protected void setAttributeInternal(GlowplugProperty property, double value) {
+	protected void setPropertyInternal(GlowplugProperty property, double value) {
 		if(values == null) {
 			values = new ContentValues();
 		}
 		values.put(property.getSqliteName(), value);
 	}
 
-	protected void setAttributeInternal(GlowplugProperty property, long value) {
+	protected void setPropertyInternal(GlowplugProperty property, long value) {
 		if(values == null) {
 			values = new ContentValues();
 		}
 		values.put(property.getSqliteName(), value);
 	}
 
-	protected void setAttributeInternal(GlowplugProperty property, String value) {
+	protected void setPropertyInternal(GlowplugProperty property, String value) {
 		if(values == null) {
 			values = new ContentValues();
 		}
 		values.put(property.getSqliteName(), value);
 	}
 
-	protected void setAttributeInternal(GlowplugProperty property, byte[] value) {
+	protected void setPropertyInternal(GlowplugProperty property, byte[] value) {
 		if(values == null) {
 			values = new ContentValues();
 		}
@@ -149,7 +157,7 @@ public abstract class GlowplugEntity {
 
 	public abstract String getEntityRemoteName();
 
-	protected Object getAttributeInternal(GlowplugProperty property) {
+	protected Object getPropertyInternal(GlowplugProperty property) {
 		if (values != null) {
 			return values.get(property.getSqliteName());
 		} else if (cursor != null) {

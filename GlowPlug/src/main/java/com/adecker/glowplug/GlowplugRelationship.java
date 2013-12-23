@@ -9,7 +9,7 @@ public class GlowplugRelationship extends GlowplugProperty {
 
 	private String tableName;
 	private String name;
-	private String localName;
+	private String sqliteName;
 	private String remoteName;
 	private String foreignTable;
 	private String foreignKey;
@@ -20,6 +20,9 @@ public class GlowplugRelationship extends GlowplugProperty {
 		this.name = name;
 		this.foreignTable = foreignTable;
 		this.foreignKey = foreignKey;
+
+		this.sqliteName = this.name;
+		this.remoteName = this.name;
 	}
 
     @Override
@@ -29,12 +32,12 @@ public class GlowplugRelationship extends GlowplugProperty {
 
     @Override
     public String getSqliteName() {
-        return name;
+        return sqliteName;
     }
 
     @Override
     public String getRemoteName() {
-        return name;
+        return remoteName;
     }
 
     @Override
@@ -72,5 +75,19 @@ public class GlowplugRelationship extends GlowplugProperty {
 		} else {
 			return tableName + "_" + foreignTable;
 		}
+	}
+
+	public GlowplugRelationship setSqliteName(String sqliteName) {
+		if (!sqliteName.isEmpty()) {
+			this.sqliteName = sqliteName;
+		}
+		return this;
+	}
+
+	public GlowplugRelationship setRemoteName(String remoteName) {
+		if (!remoteName.isEmpty()) {
+			this.remoteName = remoteName;
+		}
+		return this;
 	}
 }

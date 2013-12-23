@@ -3,6 +3,7 @@ package com.adecker.glowplugcompiler.example;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.JsonReader;
@@ -10,9 +11,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ListView;
-
 import com.adecker.glowplug.GlowplugOpenHelper;
-import com.adecker.glowplugcompiler.example.model.ActorEntity;
+import com.adecker.glowplugcompiler.example.model.AddressEntity;
 import com.adecker.glowplugcompiler.example.model.EntityList;
 import com.adecker.glowplugcompiler.example.model.MyActor;
 
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
@@ -62,10 +61,14 @@ public class MainActivity extends Activity {
             }
             GlowplugOpenHelper dbHelper = new GlowplugOpenHelper(context, "Sakila", 2, EntityList.entities);
 
+
             AssetManager manager = context.getAssets();
             InputStream stream = null;
 
             try {
+	            SQLiteDatabase db = dbHelper.getWritableDatabase();
+	            dbHelper.onUpgrade(db,0,0);
+
                 stream = manager.open("sakila.json");
                 JsonReader reader = new JsonReader(new InputStreamReader(stream));
                 reader.setLenient(true);
@@ -73,12 +76,15 @@ public class MainActivity extends Activity {
 
                 reader.beginArray();
                 while (reader.hasNext()) {
-                    MyActor actor = new MyActor(reader);
-                    Log.d(TAG, "added " + actor);
-                    dbHelper.getWritableDatabase().insert(MyActor.TABLE_NAME, null, actor.getContentValues());
+	                db.insert(MyActor.TABLE_NAME, null, new MyActor(reader).getContentValues());
                 }
-
                 reader.endArray();
+
+	            reader.beginArray();
+	            while (reader.hasNext()) {
+		            db.insert(AddressEntity.TABLE_NAME, null, new AddressEntity(reader).getContentValues());
+	            }
+	            reader.endArray();
 
                 reader.beginArray();
                 reader.close();
