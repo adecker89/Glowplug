@@ -24,6 +24,11 @@ public abstract class GlowplugEntity {
 	}
 
 	public GlowplugEntity(JsonReader reader) throws IllegalStateException {
+		fromJson(reader);
+	}
+
+	public void fromJson(JsonReader reader) {
+		values = new ContentValues();
 		try {
 			reader.beginObject();
 			GlowplugProperty property = null;

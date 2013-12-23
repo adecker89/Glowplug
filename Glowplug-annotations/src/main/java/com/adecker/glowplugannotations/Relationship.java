@@ -9,4 +9,5 @@ public @interface Relationship {
     Class<?> table();
     String key();
     boolean manyToMany() default false;
+	String[] constaints() default {};
 }

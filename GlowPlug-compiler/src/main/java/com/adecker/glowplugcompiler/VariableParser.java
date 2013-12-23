@@ -67,6 +67,7 @@ public class VariableParser {
 		relationship.remoteName = rel.remoteName();
 		relationship.foreignTable = getRelationshipType(rel);
 		relationship.foreignKey = rel.key();
+		relationship.constraints = rel.constaints();
 
 		if (relationship.sqliteName == null || relationship.sqliteName.isEmpty()) {
 			relationship.sqliteName = relationship.name;
@@ -95,6 +96,7 @@ public class VariableParser {
 		public String remoteName;
 		public String foreignTable;
 		public String foreignKey;
+		public String[] constraints;
 
 		public String getName() {
 			return name;
@@ -115,6 +117,8 @@ public class VariableParser {
 		public String getForeignKey() {
 			return foreignKey;
 		}
+
+		public String[] getConstraints() { return constraints; }
 	}
 
 	public static class AttributeStruct {

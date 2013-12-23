@@ -33,7 +33,7 @@ public class ${className}Entity extends GlowplugEntity{
 #if(!$attr.sqliteType.isEmpty())
             .setSqliteType("$attr.sqliteType")
 #end
-#foreach($constraint in $attr.constaints)
+#foreach($constraint in $attr.constraints)
             .addConstraint("$constraint")
 #end        ),
 #end        ;
@@ -70,6 +70,9 @@ public class ${className}Entity extends GlowplugEntity{
 #end
 #if($relationship.sqliteName != $relationship.name)
             .setSqliteName("$relationship.sqliteName")
+#end
+#foreach($constraint in $relationship.constraints)
+            .addConstraint("$constraint")
 #end        ),
 #end        ;
 

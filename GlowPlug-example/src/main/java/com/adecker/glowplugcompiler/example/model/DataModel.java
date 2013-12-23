@@ -32,11 +32,42 @@ public class DataModel {
 		public String address;
 		public String address2;
 		public String district;
-		@Relationship(table=City.class, key="_id", remoteName="city_id")
+		@Relationship(table=City.class, key="_id", remoteName="city_id", constaints = {"DEFERRABLE INITIALLY DEFERRED"})
 		public long city;
 		@Attribute(remoteName = "postal_code")
 		public String postalCode;
 		public String phone;
+		@Attribute(remoteName = "last_update")
+		public long lastUpdate;
+	}
+
+	@Entity
+	public static class Category {
+		@Attribute(primaryKey = true, autoIncrement = true, sqliteName = "_id", remoteName="category_id")
+		public long id;
+		public String name;
+		@Attribute(remoteName = "last_update")
+		public String lastUpdate;
+	}
+
+
+	@Entity
+	public static class City {
+		@Attribute(primaryKey = true, autoIncrement = true, sqliteName = "_id", remoteName="city_id")
+		public long id;
+		public String city;
+
+		@Relationship(table=Country.class, key="_id", sqliteName = "country_id", constaints = {"DEFERRABLE INITIALLY DEFERRED"})
+		public long countryId;
+		@Attribute(remoteName = "last_update")
+		public long lastUpdate;
+	}
+
+	@Entity
+	public static class Country {
+		@Attribute(primaryKey = true, primaryKeyConflict = "ON CONFLICT REPLACE")
+		public long _id;
+		public String country;
 		@Attribute(remoteName = "last_update")
 		public long lastUpdate;
 	}
@@ -58,25 +89,6 @@ public class DataModel {
 		public double replacementCost;
         @Attribute(sqliteType="INTEGER")
 		public int rating;
-		public long lastUpdate;
-	}
-
-	@Entity
-	public static class City {
-        @Attribute(primaryKey = true, autoIncrement = true)
-		public long _id;
-		public String city;
-
-		@Relationship(table=Country.class, key="_id")
-		public long countryId;
-		public long lastUpdate;
-	}
-
-	@Entity
-	public static class Country {
-        @Attribute(primaryKey = true, primaryKeyConflict = "ON CONFLICT REPLACE")
-		public long _id;
-		public String country;
 		public long lastUpdate;
 	}
 

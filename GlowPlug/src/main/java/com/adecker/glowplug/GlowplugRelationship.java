@@ -2,6 +2,8 @@ package com.adecker.glowplug;
 
 import com.adecker.glowplugannotations.GlowplugType;
 
+import java.util.ArrayList;
+
 /**
  * Created by alex on 12/12/13.
  */
@@ -14,6 +16,8 @@ public class GlowplugRelationship extends GlowplugProperty {
 	private String foreignTable;
 	private String foreignKey;
 	private boolean manyToMany;
+
+	private ArrayList<String> constraints = new ArrayList<String>();
 
 	public GlowplugRelationship(String tableName, String name, String foreignTable, String foreignKey) {
 		this.tableName = tableName;
@@ -62,8 +66,8 @@ public class GlowplugRelationship extends GlowplugProperty {
 		return manyToMany;
 	}
 
-	public String[] getConstraints() {
-		return new String[0];
+	public ArrayList<String> getConstraints() {
+		return constraints;
 	}
 
 	/**
@@ -90,4 +94,10 @@ public class GlowplugRelationship extends GlowplugProperty {
 		}
 		return this;
 	}
+
+	public GlowplugRelationship addConstraint(String constraint) {
+		constraints.add(constraint);
+		return this;
+	}
+
 }

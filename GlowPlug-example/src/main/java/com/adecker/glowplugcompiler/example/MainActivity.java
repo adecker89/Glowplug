@@ -11,10 +11,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ListView;
+import com.adecker.glowplug.GlowplugEntity;
 import com.adecker.glowplug.GlowplugOpenHelper;
-import com.adecker.glowplugcompiler.example.model.AddressEntity;
-import com.adecker.glowplugcompiler.example.model.EntityList;
-import com.adecker.glowplugcompiler.example.model.MyActor;
+import com.adecker.glowplugcompiler.example.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,27 +64,28 @@ public class MainActivity extends Activity {
             AssetManager manager = context.getAssets();
             InputStream stream = null;
 
+	        SQLiteDatabase db = dbHelper.getWritableDatabase();
+	        dbHelper.onUpgrade(db,0,0);
+
+	        db.beginTransaction();
+
             try {
-	            SQLiteDatabase db = dbHelper.getWritableDatabase();
-	            dbHelper.onUpgrade(db,0,0);
+
 
                 stream = manager.open("sakila.json");
                 JsonReader reader = new JsonReader(new InputStreamReader(stream));
                 reader.setLenient(true);
                 reader.beginArray();
 
-                reader.beginArray();
-                while (reader.hasNext()) {
-	                db.insert(MyActor.TABLE_NAME, null, new MyActor(reader).getContentValues());
-                }
-                reader.endArray();
+	            parseAndInsertEntityArray(db, reader, new MyActor());
+	            parseAndInsertEntityArray(db, reader, new AddressEntity());
+	            parseAndInsertEntityArray(db, reader, new CategoryEntity());
+	            parseAndInsertEntityArray(db, reader, new CityEntity());
+	            parseAndInsertEntityArray(db, reader, new CountryEntity());
+	            parseAndInsertEntityArray(db, reader, new CustomerEntity());
+	            parseAndInsertEntityArray(db, reader, new FilmEntity());
 
-	            reader.beginArray();
-	            while (reader.hasNext()) {
-		            db.insert(AddressEntity.TABLE_NAME, null, new AddressEntity(reader).getContentValues());
-	            }
-	            reader.endArray();
-
+	            db.setTransactionSuccessful();
                 reader.beginArray();
                 reader.close();
             } catch (IOException e) {
@@ -93,6 +93,7 @@ public class MainActivity extends Activity {
             } catch (IllegalStateException e) {
                 Log.d(TAG, "error loading json", e);
             } finally {
+	            db.endTransaction();
                 if (stream != null) {
                     try {
                         stream.close();
@@ -104,7 +105,16 @@ public class MainActivity extends Activity {
             return null;
         }
 
-        @Override
+	    private void parseAndInsertEntityArray(SQLiteDatabase db, JsonReader reader, GlowplugEntity entity) throws IOException {
+		    reader.beginArray();
+		    while (reader.hasNext()) {
+			    entity.fromJson(reader);
+			    db.insert(entity.getEntityName(), null, entity.getContentValues());
+		    }
+		    reader.endArray();
+	    }
+
+	    @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
         }
