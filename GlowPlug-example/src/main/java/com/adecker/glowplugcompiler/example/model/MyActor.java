@@ -15,16 +15,18 @@ public class MyActor extends ActorEntity {
         super(reader);
     }
 
-    public MyActor(Cursor cursor, int index) {
-        super(cursor, index);
-    }
+	public String getFirstNameCapitalized() {
+		String firstName = getFirstName();
+		return firstName.substring(0,1).toUpperCase() + firstName.substring(1).toLowerCase();
+	}
 
-    public MyActor(Cursor cursor, int index, String[] projection) {
-        super(cursor, index, projection);
-    }
+	public String getLastNameCapitalized() {
+		String lastName = getLastName();
+		return lastName.substring(0,1).toUpperCase() + lastName.substring(1).toLowerCase();
+	}
 
     @Override
     public String toString() {
-        return "";//this.getFirstName() + " " + this.getLastName();
+        return this.getFirstNameCapitalized() + " " + this.getLastNameCapitalized();
     }
 }

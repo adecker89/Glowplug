@@ -2,12 +2,17 @@ package ${packageName};
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.JsonReader;
 
 import com.adecker.glowplug.GlowplugAttribute;
 import com.adecker.glowplug.GlowplugEntity;
+import com.adecker.glowplug.GlowplugProperty;
 import com.adecker.glowplug.GlowplugRelationship;
 import com.adecker.glowplugannotations.GlowplugType;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ${className}Entity extends GlowplugEntity{
     public static final String TABLE_NAME = "${tableName}";
@@ -56,10 +61,11 @@ public class ${className}Entity extends GlowplugEntity{
         }
     }
 
+#if(!$relationships.isEmpty)
     public static class RelationshipNames {
- #foreach($relationship in $relationships)
+#foreach($relationship in $relationships)
         public static final String ${relationship.name.toUpperCase()} = "$relationship.sqliteName";
- #end
+#end
     }
 
     public static enum Relationship {
@@ -75,6 +81,7 @@ public class ${className}Entity extends GlowplugEntity{
             .addConstraint("$constraint")
 #end        ),
 #end        ;
+#end
 
         private GlowplugRelationship relationship;
         private Relationship(GlowplugRelationship relationship) {
@@ -94,8 +101,9 @@ public class ${className}Entity extends GlowplugEntity{
         }
     }
 
-    private GlowplugAttribute[] attributes;
-    private GlowplugRelationship[] relationships;
+    private static GlowplugAttribute[] attributes;
+    private static GlowplugRelationship[] relationships;
+    private static Map<String, GlowplugProperty> propertyMap;
 
     public ${className}Entity() {
         super();
@@ -105,12 +113,8 @@ public class ${className}Entity extends GlowplugEntity{
         super(reader);
     }
 
-    public ${className}Entity(Cursor cursor, int index) {
-        super(cursor,index);
-    }
-
-    public ${className}Entity(Cursor cursor, int index, String[] projection) {
-        super(cursor,index,projection);
+    public ${className}Entity(Cursor cursor) {
+        super(cursor);
     }
 
     @Override
@@ -129,7 +133,7 @@ public class ${className}Entity extends GlowplugEntity{
     }
 
     @Override
-    public GlowplugAttribute[] getAttributes() {
+    public synchronized GlowplugAttribute[] getAttributes() {
         Attribute[] values = Attribute.values();
         if(attributes == null) {
             attributes = new GlowplugAttribute[values.length];
@@ -142,7 +146,7 @@ public class ${className}Entity extends GlowplugEntity{
     }
 
     @Override
-    public GlowplugRelationship[] getRelationships() {
+    public synchronized GlowplugRelationship[] getRelationships() {
         Relationship[] values = Relationship.values();
         if(relationships == null) {
             relationships = new GlowplugRelationship[values.length];
@@ -152,6 +156,40 @@ public class ${className}Entity extends GlowplugEntity{
         }
 
         return relationships;
+    }
+
+    @Override
+	public synchronized Map<String, GlowplugProperty> getPropertyMap() {
+		if (propertyMap == null) {
+			propertyMap = new HashMap<String, GlowplugProperty>();
+			for (GlowplugProperty attr : getAttributes()) {
+				propertyMap.put(attr.getRemoteName(), attr);
+			}
+			for (GlowplugProperty rel : getRelationships()) {
+				propertyMap.put(rel.getRemoteName(), rel);
+			}
+		}
+		return propertyMap;
+	}
+
+    public static Cursor selectAll(SQLiteDatabase db) {
+        return select(db,null,null,null,null);
+    }
+
+    public static Cursor selectAll(SQLiteDatabase db, String[] projection) {
+        return select(db,projection,null,null,null);
+    }
+
+    public static Cursor selectAll(SQLiteDatabase db, String[] projection, String orderBy) {
+        return select(db,projection,null,null,orderBy);
+    }
+
+    public static Cursor select(SQLiteDatabase db, String selection, String[] selectionArgs) {
+        return select(db,null,selection,selectionArgs,null);
+    }
+
+    public static Cursor select(SQLiteDatabase db, String[] projection, String selection, String[] selectionArgs, String orderBy) {
+        return db.query(TABLE_NAME,projection,selection,selectionArgs,null,null,orderBy);
     }
 
 #foreach($attr in $attrs)

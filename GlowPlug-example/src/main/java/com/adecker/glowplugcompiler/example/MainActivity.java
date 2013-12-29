@@ -3,14 +3,20 @@ package com.adecker.glowplugcompiler.example;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.JsonReader;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import com.adecker.glowplug.GlowplugEntity;
 import com.adecker.glowplug.GlowplugOpenHelper;
 import com.adecker.glowplugcompiler.example.model.*;
@@ -19,19 +25,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements FilmListFragment.OnFragmentInteractionListener, ActorListFragment.OnActorInteractionListener {
     private static final String TAG = "MainActivity";
     ListView bookmarkList;
 
-    private GlowplugOpenHelper dbHelper;
+	private TextView status;
 
 
-    @Override
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+		status = (TextView) findViewById(R.id.statusText);
     }
+	
+	public void updateStatus(String statusText) {
+		status.setText(statusText);
+	}
 
     public void loadJson(View v) {
         new LoadJsonTask(this).execute();
@@ -44,22 +57,32 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    public static class LoadJsonTask extends AsyncTask<Void, Integer, Integer> {
+	@Override
+	public void onFragmentInteraction(String id) {
 
-        private WeakReference<Context> weakContext;
+	}
 
-        public LoadJsonTask(Context context) {
-            weakContext = new WeakReference<Context>(context);
+	@Override
+	public void onActorClick(String id) {
+
+	}
+
+	public static class LoadJsonTask extends AsyncTask<Void, String, Integer> {
+
+        private WeakReference<MainActivity> weakContext;
+	    private HashMap<String,Integer> progress = new HashMap<String, Integer>();
+
+        public LoadJsonTask(MainActivity context) {
+            weakContext = new WeakReference<MainActivity>(context);
         }
 
         @Override
         protected Integer doInBackground(Void... params) {
-            Context context = weakContext.get();
+	        MainActivity context = weakContext.get();
             if (context == null) {
                 return 0;
             }
-            GlowplugOpenHelper dbHelper = new GlowplugOpenHelper(context, "Sakila", 2, EntityList.entities);
-
+	        GlowplugOpenHelper dbHelper = new SakilaHelper(context);
 
             AssetManager manager = context.getAssets();
             InputStream stream = null;
@@ -106,17 +129,36 @@ public class MainActivity extends Activity {
         }
 
 	    private void parseAndInsertEntityArray(SQLiteDatabase db, JsonReader reader, GlowplugEntity entity) throws IOException {
+		    int count = 0;
 		    reader.beginArray();
 		    while (reader.hasNext()) {
 			    entity.fromJson(reader);
 			    db.insert(entity.getEntityName(), null, entity.getContentValues());
+			    count++;
+			    progress.put(entity.getEntityName(),Integer.valueOf(count));
+			    publishProgress(String.format("Loaded %d %s",count,entity.getEntityName()));
 		    }
 		    reader.endArray();
 	    }
 
 	    @Override
-        protected void onProgressUpdate(Integer... values) {
+        protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
+
+
+		    MainActivity context = weakContext.get();
+		    if (context != null) {
+			   context.updateStatus(values[0]);
+		    }
         }
+
+	    @Override
+	    protected void onPostExecute(Integer integer) {
+		    super.onPostExecute(integer);
+//		    MainActivity context = weakContext.get();
+//		    if (context != null) {
+//			    context.loadList();
+//		    }
+	    }
     }
 }
