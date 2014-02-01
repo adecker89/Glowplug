@@ -1,1 +1,11 @@
 apply plugin: 'java'
+
+apply plugin: 'maven'
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+        }
+    }
+}
+task installAll(dependsOn: uploadArchives)

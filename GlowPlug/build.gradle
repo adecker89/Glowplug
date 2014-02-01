@@ -1,11 +1,4 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.+'
-    }
-}
+
 apply plugin: 'android-library'
 
 repositories {
@@ -30,9 +23,17 @@ android {
 
 
 dependencies {
-
     dependencies {
         compile project(':Glowplug-annotations')
-        //compile project(':GlowPlug-compiler')
     }
 }
+
+apply plugin: 'maven'
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+        }
+    }
+}
+task installAll(dependsOn: uploadArchives)

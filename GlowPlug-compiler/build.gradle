@@ -2,12 +2,18 @@ apply plugin: 'java'
 
 version = '1.0'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     compile project(':Glowplug-annotations')
     compile('org.apache.velocity:velocity:1.7')
     compile('org.apache.velocity:velocity-tools:2.0')
 }
+
+apply plugin: 'maven'
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+        }
+    }
+}
+task installAll(dependsOn: uploadArchives)
