@@ -14,6 +14,8 @@ import com.adecker.glowplugcompiler.example.model.FilmEntity;
 import com.adecker.glowplugcompiler.example.model.MyActor;
 import com.adecker.glowplugcompiler.example.model.SakilaHelper;
 
+import java.util.List;
+
 public class ActorListFragment extends Fragment implements AbsListView.OnItemClickListener {
 
 	private static final String SELECTION = "selection";

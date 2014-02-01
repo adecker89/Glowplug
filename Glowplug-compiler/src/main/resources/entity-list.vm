@@ -1,0 +1,12 @@
+package ${packageName};
+
+import com.adecker.glowplug.GlowplugEntity;
+
+public class EntityList {
+
+public static GlowplugEntity[] entities = {
+#foreach($class in $classes)
+    new ${class.simpleName}Entity(),
+#end
+};
+}
