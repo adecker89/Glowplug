@@ -49,6 +49,10 @@ public class GlowplugRelationship extends GlowplugProperty {
 		return tableName + "." + getSqliteName();
 	}
 
+    public String getNaturalJoin() {
+        return getFQName() + "=" + getForeignTable()+"."+getForeignKey();
+    }
+
     @Override
     public GlowplugType getType() {
         return GlowplugType.LONG;

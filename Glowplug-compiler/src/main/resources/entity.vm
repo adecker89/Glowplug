@@ -99,6 +99,10 @@ public class ${className}Entity extends GlowplugEntity{
         public String toString() {
             return relationship.getName();
         }
+
+        public String getNaturalJoin() {
+            return relationship.getNaturalJoin();
+        }
     }
 
     private static GlowplugAttribute[] attributes;
