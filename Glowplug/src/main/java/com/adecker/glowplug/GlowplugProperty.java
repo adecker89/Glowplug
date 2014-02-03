@@ -15,4 +15,6 @@ public abstract class GlowplugProperty {
     public abstract String getFQName();
 
     public abstract GlowplugType getType();
+
+    public abstract int getIndex();
 }

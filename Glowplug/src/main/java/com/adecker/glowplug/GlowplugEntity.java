@@ -94,10 +94,11 @@ public abstract class GlowplugEntity {
 	}
 
 	public GlowplugEntity fromCursor(Cursor cursor) {
-		this.cursor = cursor;
-		this.cursorPosition = cursor.getPosition();
-		return this;
-	}
+        this.cursor = cursor;
+        this.cursorPosition = cursor.getPosition();
+
+        return this;
+    }
 
 	public abstract Map<String, GlowplugProperty> getPropertyMap();
 
@@ -181,7 +182,7 @@ public abstract class GlowplugEntity {
 	}
 
 	protected int getPropertyIndex(GlowplugProperty property) {
-		return cursor.getColumnIndex(property.getName());
+		return property.getIndex();
 	}
 
 	public ContentValues getContentValues() {

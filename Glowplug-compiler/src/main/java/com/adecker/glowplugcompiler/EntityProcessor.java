@@ -121,19 +121,25 @@ public class EntityProcessor extends AbstractProcessor {
     }
 
     private boolean parseFields(TypeElement classElement, List<VariableParser.AttributeStruct> attrs, List<VariableParser.RelationStruct> relationships) {
+        int i = 0;
         for (Element enclosed : classElement.getEnclosedElements()) {
             if (enclosed.getKind() == ElementKind.FIELD) {
                 VariableParser parser = new VariableParser(processingEnv, (VariableElement) enclosed);
                 if (parser.isRelationship()) {
-                    relationships.add(parser.parseRelationship());
+                    VariableParser.RelationStruct relationStruct = parser.parseRelationship();
+                    relationStruct.index = i;
+                    relationships.add(relationStruct);
                 } else {
-                    VariableParser.AttributeStruct attr = parser.parseAttribute();
+                    VariableParser.AttributeStruct attributeStruct = parser.parseAttribute();
+                    attributeStruct.index = i;
+                    VariableParser.AttributeStruct attr = attributeStruct;
                     if (attr == null) {
                         return false;
                     }
                     processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "adding attribute: " + attr.name);
                     attrs.add(attr);
                 }
+                i++;
             }
         }
         return true;

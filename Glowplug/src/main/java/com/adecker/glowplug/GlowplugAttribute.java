@@ -12,6 +12,7 @@ public class GlowplugAttribute extends GlowplugProperty {
     private final String tableName;
     private final String name;
     private final GlowplugType type;
+    private final int index;
 
     private boolean primaryKey = false;
     private boolean autoIncrement = false;
@@ -25,10 +26,11 @@ public class GlowplugAttribute extends GlowplugProperty {
     private String remoteName;
 
 
-    public GlowplugAttribute(String tableName, String name, GlowplugType type) {
+    public GlowplugAttribute(String tableName, String name, GlowplugType type, int index) {
         this.tableName = tableName;
         this.name = name;
         this.type = type;
+        this.index = index;
 
         sqliteName = name;
         sqliteType = "";
@@ -131,5 +133,9 @@ public class GlowplugAttribute extends GlowplugProperty {
             this.remoteName = remoteName;
         }
         return this;
+    }
+
+    public int getIndex() {
+        return index;
     }
 }

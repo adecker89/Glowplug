@@ -97,6 +97,7 @@ public class VariableParser {
 		public String foreignTable;
 		public String foreignKey;
 		public String[] constraints;
+        public int index;
 
 		public String getName() {
 			return name;
@@ -119,7 +120,11 @@ public class VariableParser {
 		}
 
 		public String[] getConstraints() { return constraints; }
-	}
+
+        public int getIndex() {
+            return index;
+        }
+    }
 
 	public static class AttributeStruct {
 		public String name;
@@ -130,6 +135,7 @@ public class VariableParser {
 		public boolean primaryKey;
 		public boolean autoIncrement;
 		public String primaryKeyConflictClause;
+        public int index;
 
 		public String getName() {
 			return name;
@@ -166,5 +172,9 @@ public class VariableParser {
 		public String getPrimaryKeyConflictClause() {
 			return primaryKeyConflictClause;
 		}
+
+        public int getIndex() {
+            return index;
+        }
 	}
 }

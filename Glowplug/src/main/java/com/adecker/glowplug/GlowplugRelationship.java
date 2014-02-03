@@ -9,21 +9,25 @@ import java.util.ArrayList;
  */
 public class GlowplugRelationship extends GlowplugProperty {
 
-	private String tableName;
-	private String name;
+	private final String tableName;
+	private final String name;
 	private String sqliteName;
 	private String remoteName;
-	private String foreignTable;
-	private String foreignKey;
+	private final String foreignTable;
+	private final String foreignKey;
+    private final int index;
+
 	private boolean manyToMany;
 
 	private ArrayList<String> constraints = new ArrayList<String>();
 
-	public GlowplugRelationship(String tableName, String name, String foreignTable, String foreignKey) {
+	public GlowplugRelationship(String tableName, String name, String foreignTable, String foreignKey, int index) {
 		this.tableName = tableName;
 		this.name = name;
 		this.foreignTable = foreignTable;
 		this.foreignKey = foreignKey;
+
+        this.index = index;
 
 		this.sqliteName = this.name;
 		this.remoteName = this.name;
@@ -58,7 +62,12 @@ public class GlowplugRelationship extends GlowplugProperty {
         return GlowplugType.LONG;
     }
 
-	public String getForeignTable() {
+    @Override
+    public int getIndex() {
+        return index;
+    }
+
+    public String getForeignTable() {
 		return foreignTable;
 	}
 
