@@ -3,32 +3,40 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.7.+'
+        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2+'
     }
 }
 apply plugin: 'android'
-
-configurations {
-    apt
-}
+apply plugin: 'android-apt'
 
 repositories {
     mavenCentral()
-//    maven {
-//        url "https://oss.sonatype.org/content/repositories/snapshots/"
-//    }
-
 }
 
-//ext.androidAnnotationsVersion = '3.0-SNAPSHOT';
-
 android {
-    compileSdkVersion 18
-    buildToolsVersion "18.0.1"
+    compileSdkVersion 19
+    buildToolsVersion "19.0.3"
 
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 19
+    }
+    sourceSets {
+        main {
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+            java.srcDirs = ['src/main/java', 'GENERATED_FOLDER']
+            resources.srcDirs = ['src/main/resources']
+            res.srcDirs = ['src/main/res']
+            assets.srcDirs = ['src/main/assets']
+        }
+    }
+}
+
+apt {
+    arguments {
+        androidManifestFile variant.processResources.manifestFile
+        resourcePackageName "com.adecker.glowplugcompiler.example"
     }
 }
 
@@ -38,36 +46,4 @@ dependencies {
     compile 'com.android.support:appcompat-v7:18.0.0'
     apt project(':Glowplug-compiler')
     compile project(':Glowplug')
-}
-
-
-android.applicationVariants.all { variant ->
-    ext.aptOutput = file("${project.buildDir}/source/apt_generated")
-    ext.aptOutput.mkdirs()
-    variant.javaCompile.options.compilerArgs += [
-            '-processorpath', configurations.apt.asPath,
-            '-AandroidManifestFile=' + variant.processResources.manifestFile,
-            '-s', ext.aptOutput
-    ]
-}
-
-task addTest() {
-
-    def src = ["${project.buildDir}/source/apt_generated"]
-    def  file = file("GlowPlug-example.iml")
-
-    doLast{
-        def parsedXml = (new XmlParser()).parse(file)
-        def node = parsedXml.component[1].content[0]
-        src.each{
-            def path = 'file://$MODULE_DIR$/'+"${it}"
-            def set =  node.find { it.@url == path}
-            if( set == null) {
-                new Node(node, 'sourceFolder', [ 'url' :'file://$MODULE_DIR$/'+"${it}", 'isTestSource':"true"])
-                def writer = new StringWriter()
-                new XmlNodePrinter(new PrintWriter(writer)).print(parsedXml)
-                file.text = writer.toString()
-            }
-        }
-    }
 }

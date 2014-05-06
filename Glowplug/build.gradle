@@ -6,17 +6,19 @@ repositories {
 }
 
 android {
-    compileSdkVersion 18
-    buildToolsVersion "18.0.1"
+    compileSdkVersion 19
+    buildToolsVersion "19.0.3"
 
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 19
     }
-    release {
-        runProguard false
-        proguardFile 'proguard-rules.txt'
-        proguardFile getDefaultProguardFile('proguard-android.txt')
+    buildTypes {
+        release {
+            runProguard false
+            proguardFile 'proguard-rules.txt'
+            proguardFile getDefaultProguardFile('proguard-android.txt')
+        }
     }
 }
 
