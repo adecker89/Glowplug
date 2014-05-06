@@ -10,4 +10,5 @@ public @interface Relationship {
     String key();
     boolean manyToMany() default false;
 	String[] constaints() default {};
+    boolean primaryKey() default false;
 }
