@@ -47,7 +47,6 @@ public class EntityProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
         long startTime = System.currentTimeMillis();
-        String fqClassName, className, packageName, tableName;
         ArrayList<Element> entities = new ArrayList<Element>();
 
         ve = initVelocity();
@@ -64,6 +63,11 @@ public class EntityProcessor extends AbstractProcessor {
         }
 
         generateEntityList(entities);
+
+        if(entities.size() > 0) {
+            String packageName = Util.getPackage(entities.get(0)).getQualifiedName().toString();
+            generateContentProvider(packageName);
+        }
 
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "finished annotation processing, took " + (System.currentTimeMillis() - startTime) + " milliseconds" + startTime);
         return true;
@@ -160,6 +164,21 @@ public class EntityProcessor extends AbstractProcessor {
 
 
         writeTemplateToFile(vt, vc, name, null);
+    }
+
+    private void generateContentProvider(String packageName) {
+
+        String name = "MyProvider";
+        String fullName = packageName + "." + name;
+
+        VelocityContext vc = new VelocityContext();
+        vc.put("name", name);
+        vc.put("packageName", packageName);
+        vc.put("authority", packageName);
+
+        Template vt = ve.getTemplate("content-provider.vm");
+
+        writeTemplateToFile(vt, vc, fullName, null);
     }
 
     private void writeTemplateToFile(Template vt, VelocityContext vc, String fileName, Element originatingElement) {

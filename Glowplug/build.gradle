@@ -38,4 +38,4 @@ uploadArchives {
         }
     }
 }
-task installAll(dependsOn: uploadArchives)
+task install(dependsOn: uploadArchives)

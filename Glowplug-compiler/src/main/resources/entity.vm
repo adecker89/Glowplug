@@ -1,8 +1,11 @@
 package ${packageName};
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.os.Bundle;
 import android.util.JsonReader;
 
 import com.adecker.glowplug.GlowplugAttribute;
@@ -16,6 +19,7 @@ import java.util.Map;
 
 public class ${className}Entity extends GlowplugEntity{
     public static final String TABLE_NAME = "${tableName}";
+    public static final Uri CONTENT_URI = Uri.parse("content://${packageName}/${tableName}");
 
     public static class AttributeNames {
 #foreach($attr in $attrs)
@@ -109,6 +113,14 @@ public class ${className}Entity extends GlowplugEntity{
     private static GlowplugRelationship[] relationships;
     private static Map<String, GlowplugProperty> propertyMap;
 
+    public static Uri getContentUri() {
+        return CONTENT_URI;
+    }
+
+    public static Uri getContentUri(long id) {
+        return ContentUris.withAppendedId(CONTENT_URI,id);
+    }
+
     public ${className}Entity() {
         super();
     }
@@ -119,6 +131,10 @@ public class ${className}Entity extends GlowplugEntity{
 
     public ${className}Entity(Cursor cursor) {
         super(cursor);
+    }
+
+    public ${className}Entity(Bundle bundle) {
+        super(bundle);
     }
 
     @Override

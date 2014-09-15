@@ -1,0 +1,26 @@
+package ${packageName};
+
+import android.database.sqlite.SQLiteOpenHelper;
+
+import com.adecker.glowplug.GlowplugContentProvider;
+import com.adecker.glowplug.GlowplugEntity;
+
+public class ${name} extends GlowplugContentProvider {
+
+    public static final String AUTHORITY = "${authority}";
+
+    @Override
+    protected String getAuthority() {
+        return AUTHORITY;
+    }
+
+    @Override
+    protected GlowplugEntity[] getEntities() {
+        return EntityList.entities;
+    }
+
+    @Override
+    protected SQLiteOpenHelper getOpenHelper() {
+        return null;
+    }
+}

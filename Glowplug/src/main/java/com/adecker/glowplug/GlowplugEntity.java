@@ -3,6 +3,9 @@ package com.adecker.glowplug;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.JsonReader;
 import android.util.Log;
 
@@ -30,8 +33,12 @@ public abstract class GlowplugEntity {
 		fromCursor(cursor);
 	}
 
+    public GlowplugEntity(Bundle bundle) {
+        fromBundle(bundle);
+    }
 
-	public void fromJson(JsonReader reader) {
+
+	public GlowplugEntity fromJson(JsonReader reader) {
 		values = new ContentValues();
 		try {
 			reader.beginObject();
@@ -91,6 +98,7 @@ public abstract class GlowplugEntity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+        return this;
 	}
 
 	public GlowplugEntity fromCursor(Cursor cursor) {
@@ -98,6 +106,53 @@ public abstract class GlowplugEntity {
         this.cursorPosition = cursor.getPosition();
 
         return this;
+    }
+
+    public GlowplugEntity fromBundle(Bundle bundle) {
+        for(GlowplugProperty property : getPropertyMap().values()) {
+            switch (property.getType()) {
+                case LONG:
+                    setPropertyInternal(property,bundle.getLong(property.getName()));
+                    break;
+                case INTEGER:
+                    setPropertyInternal(property,bundle.getInt(property.getName()));
+                    break;
+                case STRING:
+                    setPropertyInternal(property,bundle.getString(property.getName()));
+                    break;
+                case BOOLEAN:
+                    setPropertyInternal(property,bundle.getBoolean(property.getName()));
+                    break;
+                case DOUBLE:
+                    setPropertyInternal(property,bundle.getDouble(property.getName()));
+                    break;
+                case FLOAT:
+                    setPropertyInternal(property,bundle.getFloat(property.getName()));
+                    break;
+                case BLOB:
+                    Log.w(TAG,"Putting blobs in bundles is not implemented");
+                    break;
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     * @return the non-composite primary key of an entity. Returns null if key is composite or not found
+     */
+    public GlowplugAttribute getPrimaryKey() {
+        GlowplugAttribute primaryKey = null;
+        for(GlowplugAttribute attr : getAttributes()) {
+            if(attr.isPrimaryKey()) {
+                if(primaryKey == null) {
+                    primaryKey = attr;
+                } else {
+                    return null;
+                }
+            }
+        }
+        return primaryKey;
     }
 
 	public abstract Map<String, GlowplugProperty> getPropertyMap();
@@ -126,6 +181,13 @@ public abstract class GlowplugEntity {
 		}
 		values.put(property.getSqliteName(), value);
 	}
+
+    protected void setPropertyInternal(GlowplugProperty property, int value) {
+        if (values == null) {
+            values = new ContentValues();
+        }
+        values.put(property.getSqliteName(), value);
+    }
 
 	protected void setPropertyInternal(GlowplugProperty property, long value) {
 		if (values == null) {
@@ -156,8 +218,10 @@ public abstract class GlowplugEntity {
 
 	protected Object getPropertyInternal(GlowplugProperty property) {
 		if (values != null && values.containsKey(property.getSqliteName())) {
+            Log.i(TAG,"Property:"+property.getName()+" getting value from ContentValues");
 			return values.get(property.getSqliteName());
 		} else if (cursor != null) {
+            Log.i(TAG,"Property:"+property.getName()+" getting value from cursor");
 			cursor.moveToPosition(cursorPosition);
 			switch (property.getType()) {
 				case LONG:
@@ -174,10 +238,29 @@ public abstract class GlowplugEntity {
 					return cursor.getFloat(getPropertyIndex(property));
 				case BLOB:
 					return cursor.getBlob(getPropertyIndex(property));
+                default:
+                    throw new InternalError("Property with name <"+property.getName()+"> accessed with unknown type"+property.getType());
 			}
-			return null;
 		} else {
-			return null;
+            Log.v(TAG,"Property:"+property.getName()+" getting default value");
+            switch (property.getType()) {
+                case LONG:
+                    return Long.valueOf(0);
+                case INTEGER:
+                    return Integer.valueOf(0);
+                case STRING:
+                    return null;
+                case BOOLEAN:
+                    return Boolean.valueOf(false);
+                case DOUBLE:
+                    return Double.valueOf(0);
+                case FLOAT:
+                    return Float.valueOf(0);
+                case BLOB:
+                    return new byte[0];
+                default:
+                    throw new InternalError("Property with name <"+property.getName()+"> accessed with unknown type"+property.getType());
+            }
 		}
 	}
 
@@ -188,4 +271,41 @@ public abstract class GlowplugEntity {
 	public ContentValues getContentValues() {
 		return values;
 	}
+
+    public Bundle getBundle() {
+        Bundle bundle = new Bundle();
+        for(GlowplugProperty property : getPropertyMap().values()) {
+            Log.v("","Bundling " + property.getName());
+            Object value = getPropertyInternal(property);
+            switch (property.getType()) {
+                case LONG:
+                    bundle.putLong(property.getName(),(Long)value);
+                    break;
+                case INTEGER:
+                    bundle.putInt(property.getName(), (Integer) value);
+                    break;
+                case STRING:
+                    bundle.putString(property.getName(), (String) value);
+                    break;
+                case BOOLEAN:
+                    bundle.putBoolean(property.getName(), (Boolean) value);
+                    break;
+                case DOUBLE:
+                    bundle.putDouble(property.getName(), (Double) value);
+                    break;
+                case FLOAT:
+                    bundle.putFloat(property.getName(), (Float) value);
+                    break;
+                case BLOB:
+                    Log.w(TAG,"Putting blobs in bundles is not implemented");
+                    break;
+            }
+        }
+
+        return bundle;
+    }
+
+    public String getUriPath() {
+        return "/" + getEntityName() + "/" + getPropertyInternal(getPrimaryKey());
+    }
 }
